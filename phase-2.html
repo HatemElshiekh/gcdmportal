@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2: Testing — Executive Digital Marketing Dashboard</title>
+<style>
+  :root {
+    --navy: #365888;
+    --navy-dark: #203a5e;
+    --navy-deep: #172b47;
+    --navy-soft: #eef3f8;
+    --navy-soft-2: #dde8f3;
+    --blue-mid: #6181B4;
+    --blue-light: #9EAECA;
+    --grey: #909496;
+    --grey-dark: #5b5e61;
+    --grey-soft: #f2f4f6;
+    --ink: #172033;
+    --muted: #6f7780;
+    --line: #e3e8ef;
+    --bg: #f6f8fb;
+    --white: #ffffff;
+    --done: #1d9e75;
+    --done-bg: #e8f5f0;
+    --progress: #ba7517;
+    --progress-bg: #f8efe2;
+    --scheduled: #365888;
+    --scheduled-bg: #eef3f8;
+    --ongoing: #767b7e;
+    --ongoing-bg: #eceeef;
+    --shadow-soft: 0 18px 50px rgba(31, 42, 55, 0.08);
+    --shadow-card: 0 10px 28px rgba(31, 42, 55, 0.07);
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    min-height: 100vh;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 8% 0%, rgba(54, 88, 136, 0.16), transparent 34%),
+      radial-gradient(circle at 88% 12%, rgba(97, 129, 180, 0.13), transparent 30%),
+      linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button, input, select { font: inherit; }
+
+  .app {
+    width: min(1400px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 28px 0 34px;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.18), transparent 20%),
+      linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 58%, #466b9d 100%);
+    color: var(--white);
+    min-height: 252px;
+    padding: 34px;
+    box-shadow: var(--shadow-soft);
+  }
+  .hero::before, .hero::after { content: ''; position: absolute; border-radius: 999px; pointer-events: none; }
+  .hero::before { width: 340px; height: 340px; right: -86px; top: -118px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); }
+  .hero::after { width: 180px; height: 180px; left: 54%; bottom: -90px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 28px; align-items: stretch; }
+  .eyebrow { font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: rgba(255,255,255,0.76); font-weight: 800; }
+  .hero h1 { max-width: 760px; font-size: clamp(38px, 5vw, 68px); line-height: 0.98; letter-spacing: -2.2px; margin-top: 12px; font-weight: 800; }
+  .hero-copy { max-width: 760px; margin-top: 18px; color: rgba(255,255,255,0.82); font-size: 16px; line-height: 1.65; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .meta-chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.88); padding: 9px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; backdrop-filter: blur(12px); }
+
+  .hero-status { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.12); border-radius: 22px; padding: 22px; backdrop-filter: blur(14px); }
+  .status-label { color: rgba(255,255,255,0.70); text-transform: uppercase; letter-spacing: 1.3px; font-size: 10px; font-weight: 800; }
+  .status-main { margin-top: 8px; font-size: 34px; letter-spacing: -1px; font-weight: 800; }
+  .status-sub { margin-top: 4px; color: rgba(255,255,255,0.74); font-size: 13px; line-height: 1.45; }
+  .mini-progress { margin-top: 20px; }
+  .mini-progress-top { display: flex; align-items: center; justify-content: space-between; color: rgba(255,255,255,0.78); font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+  .mini-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
+  .mini-fill { display: block; height: 100%; width: 14%; border-radius: inherit; background: var(--white); }
+
+  .edit-toolbar { margin: 18px 0 0; display: flex; justify-content: space-between; align-items: center; gap: 14px; background: rgba(255,255,255,0.78); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(31,42,55,0.05); backdrop-filter: blur(12px); color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+  .edit-toolbar strong { color: var(--navy); }
+  .toolbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .toolbar-btn { border: 1px solid var(--line); background: var(--white); color: var(--navy); padding: 8px 11px; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer; transition: all 0.15s ease; }
+  .toolbar-btn:hover { transform: translateY(-1px); border-color: rgba(54,88,136,0.35); box-shadow: 0 10px 20px rgba(31,42,55,0.06); }
+
+  .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin: 18px 0; }
+  .metric-card { min-height: 102px; background: rgba(255,255,255,0.86); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; justify-content: space-between; }
+  .metric-card strong { font-size: 30px; color: var(--navy); letter-spacing: -1px; line-height: 1; }
+  .metric-card span { margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.35; font-weight: 700; }
+
+  .phase-strip-wrap { margin-bottom: 18px; }
+  .section-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+  .phase-strip { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+  .phase-month { min-height: 72px; border-radius: 16px; padding: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.88); color: var(--muted); box-shadow: 0 8px 20px rgba(31,42,55,0.04); }
+  .phase-month.pre { background: var(--done-bg); color: var(--done); border-color: rgba(29,158,117,0.18); }
+  .phase-month.active { background: var(--navy-soft); color: var(--navy); border-color: rgba(54,88,136,0.18); }
+  .phase-month.closing { background: #fff7e9; color: var(--progress); border-color: rgba(186,117,23,0.20); }
+  .phase-name { font-size: 15px; font-weight: 900; }
+  .marker { display: block; margin-top: 6px; font-size: 10px; line-height: 1.3; font-weight: 800; letter-spacing: 0.35px; text-transform: uppercase; }
+
+  .pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .pillar { position: relative; overflow: hidden; background: rgba(255,255,255,0.9); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px; min-height: 160px; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease; }
+  .pillar:hover { transform: translateY(-2px); border-color: rgba(54,88,136,0.32); box-shadow: 0 18px 44px rgba(31,42,55,0.09); }
+  .pillar.active { color: var(--white); border-color: transparent; background: linear-gradient(135deg, var(--navy-dark), var(--navy)); }
+  .pillar::after { content: attr(data-index); position: absolute; right: 16px; bottom: 0px; font-size: 68px; line-height: 1; font-weight: 900; letter-spacing: -4px; color: rgba(54,88,136,0.08); }
+  .pillar.active::after { color: rgba(255,255,255,0.13); }
+  .pillar-letter { position: relative; z-index: 1; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; font-weight: 900; }
+  .pillar.active .pillar-letter { color: rgba(255,255,255,0.72); }
+  .pillar-name { position: relative; z-index: 1; margin-top: 10px; color: var(--navy); font-size: 21px; font-weight: 800; letter-spacing: -0.4px; }
+  .pillar.active .pillar-name { color: var(--white); }
+  .pillar-desc { position: relative; z-index: 1; max-width: 240px; margin-top: 8px; color: var(--muted); font-size: 12.5px; line-height: 1.48; }
+  .pillar.active .pillar-desc { color: rgba(255,255,255,0.76); }
+
+  .body-shell { background: rgba(255,255,255,0.52); border: 1px solid rgba(227,232,239,0.85); border-radius: var(--radius-xl); padding: 12px; box-shadow: var(--shadow-soft); }
+  .body { min-height: 520px; background: var(--white); border: 1px solid var(--line); border-radius: 22px; padding: 28px; overflow: hidden; }
+  .body.fade { animation: fadeUp 0.22s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .view-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+  .view-title { color: var(--navy); font-size: 27px; font-weight: 850; letter-spacing: -0.8px; line-height: 1.08; }
+  .view-sub { max-width: 760px; margin-top: 7px; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+  .view-tag { flex-shrink: 0; color: var(--navy); background: var(--navy-soft); border: 1px solid var(--navy-soft-2); border-radius: 999px; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 900; }
+
+  .obj-layout { display: grid; grid-template-columns: 1.04fr 1fr; gap: 16px; }
+  .obj-purpose { position: relative; overflow: hidden; min-height: 340px; padding: 26px; border-radius: var(--radius-lg); color: var(--white); background: linear-gradient(145deg, var(--navy-deep), var(--navy)); box-shadow: var(--shadow-card); }
+  .obj-purpose::after { content: ''; position: absolute; width: 210px; height: 210px; right: -70px; bottom: -70px; border-radius: 999px; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.14); }
+  .obj-purpose-label { color: rgba(255,255,255,0.66); font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; font-weight: 900; }
+  .obj-purpose h3 { position: relative; z-index: 1; max-width: 420px; margin-top: 16px; font-size: clamp(26px, 3vw, 42px); line-height: 1.02; letter-spacing: -1.4px; }
+  .obj-purpose p { position: relative; z-index: 1; max-width: 580px; margin-top: 20px; color: rgba(255,255,255,0.82); font-size: 14px; line-height: 1.72; }
+  .obj-principles { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .principle { border: 1px solid var(--line); border-radius: 18px; padding: 18px; background: var(--white); box-shadow: 0 10px 28px rgba(31,42,55,0.05); }
+  .principle-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1.1px; font-weight: 900; }
+  .principle-title { color: var(--navy); margin-top: 6px; font-size: 16px; font-weight: 850; }
+  .principle-text { margin-top: 7px; color: var(--ink); font-size: 13px; line-height: 1.56; }
+  .principle.tactical { background: var(--navy-soft); border-color: var(--navy-soft-2); }
+
+  .ws-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .ws-card { position: relative; display: grid; grid-template-columns: 48px 1fr; gap: 15px; align-items: flex-start; min-height: 178px; padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(180deg, #ffffff, #fbfcfe); cursor: pointer; box-shadow: 0 10px 26px rgba(31,42,55,0.05); transition: all 0.16s ease; }
+  .ws-card:hover { transform: translateY(-2px); border-color: rgba(54,88,136,0.32); box-shadow: 0 18px 44px rgba(31,42,55,0.09); }
+  .ws-num { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: var(--navy); color: var(--white); font-weight: 900; font-size: 16px; }
+  .ws-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .ws-title { color: var(--navy); font-size: 17px; font-weight: 850; line-height: 1.25; }
+  .ws-sub { margin-top: 6px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+  .ws-prog { flex-shrink: 0; background: var(--navy-soft); color: var(--navy); border: 1px solid var(--navy-soft-2); border-radius: 999px; padding: 5px 9px; font-size: 10.5px; line-height: 1; font-weight: 900; text-transform: uppercase; }
+  .ws-progress-bar { margin-top: 13px; height: 7px; border-radius: 999px; background: var(--navy-soft); overflow: hidden; }
+  .ws-progress-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--navy), var(--blue-mid)); }
+  .next-milestone { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.42; }
+  .next-milestone strong { color: var(--navy); }
+
+  .workstream-brief { display: grid; grid-template-columns: 1.35fr repeat(2, 0.8fr); gap: 12px; margin-bottom: 18px; }
+  .brief-card { border: 1px solid var(--line); border-radius: 18px; background: var(--white); padding: 16px; box-shadow: 0 8px 24px rgba(31,42,55,0.045); }
+  .brief-card.primary { background: var(--navy-soft); border-color: var(--navy-soft-2); }
+  .brief-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+  .brief-value { margin-top: 7px; color: var(--navy); font-size: 15px; line-height: 1.36; font-weight: 850; }
+  .items-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .ih-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+  .drag-note { color: var(--muted); font-size: 11px; }
+  .item-list { display: grid; gap: 9px; }
+  .item-row { display: grid; grid-template-columns: 24px minmax(92px, auto) 1fr minmax(74px, auto); gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: #fff; box-shadow: 0 6px 18px rgba(31,42,55,0.035); }
+  .drag-handle { width: 24px; min-height: 24px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); background: rgba(54,88,136,0.07); font-size: 14px; font-weight: 900; cursor: grab; user-select: none; }
+  .item-row.dragging { opacity: 0.48; box-shadow: 0 18px 42px rgba(31,42,55,0.16); }
+  .item-list.drag-active { outline: 2px dashed rgba(54,88,136,0.22); outline-offset: 8px; border-radius: 18px; }
+  .status-pill { justify-self: start; min-width: 84px; text-align: center; border-radius: 999px; padding: 6px 9px; color: var(--white); background: var(--navy); font-size: 10px; line-height: 1; text-transform: uppercase; letter-spacing: 0.55px; font-weight: 900; }
+  .sp-measure { background: var(--navy); }
+  .sp-test { background: var(--blue-mid); }
+  .sp-build { background: var(--progress); }
+  .sp-ops { background: var(--ongoing); }
+  .sp-handoff { background: var(--navy-dark); }
+  .item-text { color: var(--ink); font-size: 13px; line-height: 1.46; }
+  .item-when { justify-self: end; color: var(--muted); background: var(--grey-soft); border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; font-size: 10.5px; font-weight: 800; white-space: nowrap; }
+  .outcome-box { margin-top: 18px; border-radius: 20px; background: var(--navy-soft); border: 1px solid var(--navy-soft-2); padding: 18px; }
+  .outcome-label { color: var(--navy); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+  .outcome-text { margin-top: 8px; color: var(--ink); font-size: 13px; line-height: 1.58; }
+  .back-btn { margin-top: 18px; background: var(--navy); color: var(--white); border: none; border-radius: 12px; padding: 10px 16px; font-size: 12px; font-weight: 900; cursor: pointer; transition: all 0.16s ease; }
+  .back-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(54,88,136,0.18); }
+
+  .budget-top { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.75fr); gap: 14px; margin-bottom: 18px; }
+  .budget-hero { color: var(--white); background: linear-gradient(135deg, var(--navy-deep), var(--navy)); border-radius: 22px; padding: 24px; box-shadow: var(--shadow-card); }
+  .budget-hero-label { color: rgba(255,255,255,0.68); font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 900; }
+  .budget-hero-num { margin-top: 10px; font-size: clamp(38px, 4vw, 56px); line-height: 1; letter-spacing: -2px; font-weight: 900; }
+  .budget-hero-unit { margin-top: 8px; color: rgba(255,255,255,0.82); font-size: 13px; font-weight: 800; }
+  .budget-hero-note { max-width: 760px; margin-top: 16px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.62; }
+  .budget-side { display: grid; gap: 10px; }
+  .budget-stat { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 15px; box-shadow: 0 8px 24px rgba(31,42,55,0.045); }
+  .budget-stat-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+  .budget-stat-num { margin-top: 6px; color: var(--navy); font-size: 17px; font-weight: 900; line-height: 1.22; }
+  .budget-breakdown { display: grid; gap: 9px; margin: 14px 0 18px; }
+  .budget-bar-row { display: grid; grid-template-columns: 190px 1fr 132px; gap: 12px; align-items: center; }
+  .budget-bar-label, .budget-bar-value { color: var(--ink); font-size: 12px; font-weight: 800; }
+  .budget-bar-value { text-align: right; color: var(--navy); }
+  .budget-bar-track { height: 9px; background: var(--navy-soft); border-radius: 999px; overflow: hidden; }
+  .budget-bar-track span { display: block; height: 100%; background: linear-gradient(90deg, var(--navy), var(--blue-mid)); border-radius: inherit; }
+  .budget-table-wrap { overflow-x: auto; }
+  .budget-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+  .budget-table th { text-align: left; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 10px; border-bottom: 2px solid var(--navy); }
+  .budget-table th:nth-child(2), .budget-table td:nth-child(2) { text-align: right; }
+  .budget-table th:nth-child(3), .budget-table td:nth-child(3) { text-align: center; }
+  .budget-table td { padding: 13px 10px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  .b-cat { color: var(--ink); font-weight: 850; }
+  .b-detail { margin-top: 3px; color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+  .b-tag { display: inline-flex; justify-content: center; min-width: 82px; color: var(--navy); background: var(--navy-soft); border: 1px solid var(--navy-soft-2); padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.45px; }
+  .budget-notes { margin-top: 16px; color: var(--muted); background: var(--grey-soft); border-left: 4px solid var(--navy); padding: 14px 16px; border-radius: 12px; font-size: 12.5px; line-height: 1.58; }
+
+  .roadmap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .roadmap-card { position: relative; overflow: hidden; min-height: 210px; background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: 0 10px 28px rgba(31,42,55,0.05); }
+  .roadmap-card::after { content: ''; position: absolute; right: -46px; top: -58px; width: 140px; height: 140px; border-radius: 999px; background: rgba(54,88,136,0.08); }
+  .roadmap-month { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+  .roadmap-month-name { color: var(--navy); font-size: 21px; font-weight: 900; letter-spacing: -0.4px; }
+  .roadmap-count { margin-top: 4px; color: var(--muted); font-size: 11.5px; font-weight: 800; }
+  .roadmap-tag { color: var(--navy); background: var(--navy-soft); border: 1px solid var(--navy-soft-2); border-radius: 999px; padding: 6px 9px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+  .roadmap-channels { position: relative; z-index: 1; color: var(--navy); font-size: 12px; font-weight: 900; margin-bottom: 8px; }
+  .roadmap-desc { position: relative; z-index: 1; color: var(--ink); font-size: 13px; line-height: 1.56; }
+  .wave-dep { margin-top: 16px; color: var(--muted); background: var(--grey-soft); border-left: 4px solid var(--progress); padding: 14px 16px; border-radius: 12px; font-size: 12.5px; line-height: 1.58; }
+  .wave-dep strong { color: var(--navy); }
+
+  .editable-text { border-radius: 7px; outline: 1px dashed transparent; outline-offset: 3px; cursor: text; transition: background 0.14s ease, outline-color 0.14s ease, box-shadow 0.14s ease; white-space: pre-wrap; }
+  .editable-text:hover { background: rgba(54,88,136,0.08); outline-color: rgba(54,88,136,0.22); }
+  .editable-text:focus { background: rgba(255,255,255,0.92); outline: 2px solid rgba(54,88,136,0.34); box-shadow: 0 8px 24px rgba(31,42,55,0.10); }
+  .hero .editable-text:focus, .hero .editable-text:hover, .budget-hero .editable-text:focus, .budget-hero .editable-text:hover, .obj-purpose .editable-text:focus, .obj-purpose .editable-text:hover, .pillar.active .editable-text:hover, .pillar.active .editable-text:focus { background: rgba(255,255,255,0.16); outline-color: rgba(255,255,255,0.36); color: inherit; }
+  .pulse-saved { animation: pulseSaved 0.5s ease; }
+  @keyframes pulseSaved { 0% { box-shadow: 0 0 0 rgba(29,158,117,0); } 50% { box-shadow: 0 0 0 4px rgba(29,158,117,0.12); } 100% { box-shadow: 0 0 0 rgba(29,158,117,0); } }
+
+  .foot-note { margin-top: 18px; color: var(--muted); font-size: 11.5px; line-height: 1.5; font-style: italic; text-align: center; }
+
+  @media (max-width: 1080px) {
+    .hero-grid, .obj-layout, .budget-top { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: repeat(3, 1fr); }
+    .phase-strip { overflow-x: auto; display: flex; padding-bottom: 4px; }
+    .phase-month { min-width: 132px; }
+    .pillars { grid-template-columns: repeat(2, 1fr); }
+    .workstream-brief, .roadmap, .ws-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    .app { width: min(100% - 24px, 1400px); padding-top: 16px; }
+    .hero, .body { padding: 22px; border-radius: 22px; }
+    .metrics, .pillars { grid-template-columns: 1fr; }
+    .edit-toolbar { flex-direction: column; align-items: flex-start; }
+    .view-head { flex-direction: column; }
+    .item-row { grid-template-columns: 24px 1fr; align-items: start; }
+    .status-pill, .item-when { justify-self: start; grid-column: 2; }
+    .budget-bar-row { grid-template-columns: 1fr; gap: 5px; }
+    .budget-bar-value { text-align: left; }
+  }
+  .top-nav { display:flex; align-items:center; justify-content:space-between; gap:14px; margin: 0 0 18px; padding: 10px 12px; border: 1px solid rgba(226,232,240,0.9); border-radius: 18px; background: rgba(255,255,255,0.82); box-shadow: 0 12px 30px rgba(31,42,55,0.05); backdrop-filter: blur(12px); }
+  .top-nav .brand { color: var(--navy); font-weight: 800; font-size: 13px; letter-spacing: 0.2px; white-space: nowrap; }
+  .top-nav .links { display:flex; gap:8px; flex-wrap: wrap; justify-content:flex-end; }
+  .top-nav a { color: var(--muted); text-decoration:none; font-size: 12px; font-weight: 800; padding: 8px 11px; border-radius: 999px; transition: all 0.15s ease; }
+  .top-nav a:hover, .top-nav a.active-page { background: var(--navy); color: #fff; }
+  .sync-status { display:inline-flex; align-items:center; gap:6px; margin-left: 10px; padding: 5px 9px; border-radius: 999px; background: rgba(54,88,136,0.09); color: var(--navy); font-weight: 800; white-space: nowrap; }
+  .sync-status::before { content:''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.85; }
+  .sync-status.saving { color: #ba7517; background: rgba(186,117,23,0.10); }
+  .sync-status.error, .sync-status.warn { color: #b42318; background: rgba(180,35,24,0.10); }
+  .sync-status.synced { color: #1d9e75; background: rgba(29,158,117,0.10); }
+  @media (max-width: 700px) { .top-nav { align-items:flex-start; flex-direction:column; } .top-nav .links { justify-content:flex-start; } .sync-status { display:flex; width: fit-content; margin: 8px 0 0; } }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="top-nav" aria-label="Site navigation">
+    <div class="brand">Digital Marketing Plan</div>
+    <div class="links">
+      <a href="index.html">Overview</a>
+      <a href="phase-1.html">Phase 1: Foundation</a>
+      <a href="phase-2.html" class="active-page">Phase 2: Testing</a>
+    </div>
+  </nav>
+
+  <section class="hero" aria-labelledby="pageTitle">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Digital Marketing Plan</div>
+        <h1 id="pageTitle">Phase 2: Testing</h1>
+        <p class="hero-copy">An executive working dashboard for proving Gulf Cryo’s digital campaign economics before scaled investment.</p>
+        <div class="hero-meta">
+          <span class="meta-chip">September 2026 to March 2027</span>
+          <span class="meta-chip">4 strategic pillars</span>
+          <span class="meta-chip">6 testing workstreams</span>
+        </div>
+      </div>
+      <aside class="hero-status" aria-label="Current phase status">
+        <div>
+          <div class="status-label">Current stage</div>
+          <div class="status-main">Testing window</div>
+          <div class="status-sub">Controlled spend validates channel, content, market, and opportunity economics.</div>
+        </div>
+        <div class="mini-progress" aria-label="Phase progress">
+          <div class="mini-progress-top"><span>Phase timeline</span><span>Sep–Mar</span></div>
+          <div class="mini-track"><span class="mini-fill"></span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="edit-toolbar" aria-label="Editing tools">
+    <span><strong>Edit mode:</strong> click any text to edit it, then click away to save. Open a workstream and drag KPI rows to rearrange them. <span class="sync-status" id="syncStatus">Local draft</span></span>
+    <div class="toolbar-actions">
+      <button class="toolbar-btn" id="exportState" type="button">Export JSON</button>
+      <button class="toolbar-btn" id="resetEdits" type="button">Reset edits</button>
+    </div>
+  </section>
+
+  <section class="metrics" id="metrics" aria-label="Phase summary metrics"></section>
+
+  <section class="phase-strip-wrap" aria-label="Phase months">
+    <div class="section-label"><span>Testing strip</span><span>Phase 2 close: March 2027</span></div>
+    <div class="phase-strip" id="phaseStrip"></div>
+  </section>
+
+  <nav class="pillars" id="pillars" aria-label="Dashboard pillars">
+    <div class="pillar" data-pillar="objectives" data-index="01" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 01</div>
+      <div class="pillar-name">Objectives</div>
+      <div class="pillar-desc">Why we test and what the spend is for.</div>
+    </div>
+    <div class="pillar" data-pillar="deliverables" data-index="02" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 02</div>
+      <div class="pillar-name">Deliverables</div>
+      <div class="pillar-desc">Six workstreams that prove the model.</div>
+    </div>
+    <div class="pillar" data-pillar="budget" data-index="03" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 03</div>
+      <div class="pillar-name">Budget</div>
+      <div class="pillar-desc">Testing allocation and quarterly breakdown.</div>
+    </div>
+    <div class="pillar" data-pillar="timeframe" data-index="04" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 04</div>
+      <div class="pillar-name">Timeframe</div>
+      <div class="pillar-desc">Four waves from September to March.</div>
+    </div>
+  </nav>
+
+  <main class="body-shell" aria-live="polite">
+    <div class="body" id="body"></div>
+  </main>
+
+  <div class="foot-note">Working view for discussion. LinkedIn costs anchored on real data. Google Search costs confirmed during Phase 1 keyword work. Dynamics CRM assumed live at website launch.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script>
+  const PAGE_ID = 'phase-2';
+  const STORAGE_KEY = 'phase2-testing-executive-dashboard-editable-v1';
+
+  const STRIP = [
+    { label: 'Aug', cls: 'pre', marker: 'Phase 1 closes' },
+    { label: 'Sep', cls: 'active', marker: 'Meta starts' },
+    { label: 'Oct', cls: 'active', marker: 'LinkedIn starts' },
+    { label: 'Nov', cls: 'active', marker: 'Google starts' },
+    { label: 'Dec', cls: 'active', marker: 'Testing wave' },
+    { label: 'Jan', cls: 'active', marker: 'Full activation' },
+    { label: 'Feb', cls: 'active', marker: 'Consolidate' },
+    { label: 'Mar', cls: 'closing', marker: 'Phase 2 closes' }
+  ];
+
+  const DEFAULT_WORKSTREAMS = [
+    {
+      num: 1, id: 'content', title: 'Content Performance Testing',
+      sub: 'Which content drives form submissions, per track, per segment', tag: 'testing',
+      desc: 'Both content tracks run: conventional business and future-and-trends. The test finds which formats, angles, and messages drive the most form submissions within each track, for each priority segment.',
+      outcome: 'A verified content map showing the formats and messages that convert best, per track, per segment.',
+      items: [
+        { text: 'Conventional-track content tested: F&B solutions, metal fabrication, water treatment, healthcare', status: 'test', pill: 'TEST', when: 'Sep–Jan' },
+        { text: 'Future-track content tested: CO₂ applications, hydrogen, decarbonization', status: 'test', pill: 'TEST', when: 'Dec–Jan' },
+        { text: 'Format testing: long-form vs short-form, document vs video, case-led vs insight-led', status: 'measure', pill: 'MEASURE', when: 'Q4–Q1' },
+        { text: 'A/B testing on landing pages and content assets', status: 'measure', pill: 'A/B', when: 'Q4–Q1' },
+        { text: 'Result per segment: which content type produces the highest form submission rate', status: 'handoff', pill: 'OUTPUT', when: 'Mar' }
+      ]
+    },
+    {
+      num: 2, id: 'media', title: 'Paid Media Activation',
+      sub: 'Launch campaigns, measure channel economics', tag: 'activation',
+      desc: 'Launch paid campaigns for the first time across three channels. Measure the real cost of driving qualified traffic and form submissions through each one.',
+      outcome: 'Verified channel economics: real cost data per channel that Phase 3 budgets are built on.',
+      items: [
+        { text: 'LinkedIn campaigns: $1,000 per 20K impressions, $10 average CPC, 200K–300K impressions per wave', status: 'measure', pill: 'LINKEDIN', when: 'Oct–Mar' },
+        { text: 'Google Search campaigns from November: provisional $10–$15 CPC, confirmed by Phase 1 keyword work', status: 'measure', pill: 'GOOGLE', when: 'Nov–Mar' },
+        { text: 'Meta campaigns from September: engagement, video views, high-volume low-cost traffic to the website', status: 'test', pill: 'META', when: 'Sep–Mar' },
+        { text: 'Cost per qualified click measured per channel', status: 'measure', pill: 'CQC', when: 'Q4–Q1' },
+        { text: 'Cost per form submission measured per channel', status: 'measure', pill: 'CFS', when: 'Q4–Q1' },
+        { text: 'Cost per qualified opportunity measured per channel', status: 'handoff', pill: 'CQO', when: 'Mar' }
+      ]
+    },
+    {
+      num: 3, id: 'market', title: 'Market Activation',
+      sub: 'UAE and KSA both run, measure what each market needs differently', tag: 'activation',
+      desc: 'Run campaigns in both priority markets. UAE weighted to metallurgy and oxygen. KSA weighted to healthcare. Measure the delta and document what each market needs.',
+      outcome: 'A documented market-specific approach for each country, with cost deltas per segment.',
+      items: [
+        { text: 'UAE campaigns weighted to metallurgy and oxygen-led demand', status: 'test', pill: 'UAE', when: 'Q4–Q1' },
+        { text: 'KSA campaigns weighted to healthcare-led demand', status: 'test', pill: 'KSA', when: 'Q4–Q1' },
+        { text: 'Segment-by-market matrix: which segments respond best in which country', status: 'measure', pill: 'MATRIX', when: 'Jan–Mar' },
+        { text: 'Localization signals tested: language, framing, audience targeting', status: 'measure', pill: 'LOCALIZE', when: 'Q4–Q1' }
+      ]
+    },
+    {
+      num: 4, id: 'seo', title: 'Organic Growth and SEO',
+      sub: 'Deepen Phase 1 SEO foundation, blog as editorial asset', tag: 'build',
+      desc: 'Deepen Phase 1’s SEO infrastructure with technical specificity. Blog maintained as an industry-grade editorial asset engineered for search performance. Measured as ground gained, not cost per result.',
+      outcome: 'Ranking ground gained on priority terms, growing organic traffic, reduced paid dependency over time.',
+      items: [
+        { text: 'Keyword targeting refined, mapped to priority segments and markets', status: 'build', pill: 'SEO', when: 'Sep–Oct' },
+        { text: 'Content-to-query alignment across website pages and blog', status: 'build', pill: 'ALIGN', when: 'Q4' },
+        { text: 'Authority building: backlinks, citations, regional relevance signals', status: 'build', pill: 'AUTHORITY', when: 'Q4–Q1' },
+        { text: 'Blog content optimized against priority search terms', status: 'build', pill: 'BLOG', when: 'Q4–Q1' },
+        { text: 'Ranking movement tracked monthly on priority terms', status: 'measure', pill: 'RANKING', when: 'Monthly' },
+        { text: 'Qualified organic traffic measured as a growing base', status: 'measure', pill: 'TRAFFIC', when: 'Monthly' }
+      ]
+    },
+    {
+      num: 5, id: 'crm', title: 'CRM and Marketing Automation',
+      sub: 'Workflows that route, measure, and qualify opportunities', tag: 'operations',
+      desc: 'Optimize the CRM for marketing use. Build the workflows that connect digital campaign activity to commercial pipeline with visible attribution.',
+      outcome: 'A working automation layer connecting digital activity to commercial pipeline with visible attribution.',
+      items: [
+        { text: 'Lead scoring model defined with the commercial team', status: 'ops', pill: 'SCORING', when: 'Sep–Oct' },
+        { text: 'Marketing automation workflows configured: nurture sequences, follow-up triggers', status: 'ops', pill: 'AUTOMATE', when: 'Oct–Dec' },
+        { text: 'Opportunity routing optimized: form submission to CRM to the right commercial owner', status: 'ops', pill: 'ROUTING', when: 'Q4' },
+        { text: 'Marketing contribution dashboard refined and visible to leadership', status: 'measure', pill: 'DASHBOARD', when: 'Q4–Q1' },
+        { text: 'Customer portal usage monitored and optimized', status: 'ops', pill: 'PORTAL', when: 'Q4–Q1' }
+      ]
+    },
+    {
+      num: 6, id: 'outcomes', title: 'Phase 2 Outcomes',
+      sub: 'The verified numbers that become Phase 3’s business case', tag: 'handoff',
+      desc: 'What Phase 2 hands to Phase 3. The verified picture: every number needed to commit to scaled targets and a calculated budget.',
+      outcome: 'The Phase 3 business case: scaled targets and budget, calculated from verified data.',
+      items: [
+        { text: 'Verified cost per qualified click, per channel, per segment, per market', status: 'handoff', pill: 'CQC', when: 'Mar' },
+        { text: 'Verified cost per form submission, same breakdown', status: 'handoff', pill: 'CFS', when: 'Mar' },
+        { text: 'Verified cost per qualified opportunity accepted by the commercial team', status: 'handoff', pill: 'CQO', when: 'Mar' },
+        { text: 'Content formats and angles that convert best, documented', status: 'handoff', pill: 'CONTENT', when: 'Mar' },
+        { text: 'Channel mix that produces opportunities most efficiently, documented', status: 'handoff', pill: 'CHANNEL', when: 'Mar' },
+        { text: 'Market-specific approach differences documented with data', status: 'handoff', pill: 'MARKET', when: 'Mar' },
+        { text: 'SEO trajectory and organic traffic growth rate', status: 'handoff', pill: 'SEO', when: 'Mar' },
+        { text: 'A costed Phase 3 scaling plan built on all of the above', status: 'handoff', pill: 'PLAN', when: 'Mar' }
+      ]
+    }
+  ];
+
+  const DEFAULT_BUDGET = [
+    { cat: 'September 2026 pre-wave', detail: 'Content push and initial audience building before full testing begins.', range: '~$2,000', tag: 'Meta only', bar: 10 },
+    { cat: 'Q4 2026 (Oct–Dec)', detail: 'Ramp-up. First and second segment testing across LinkedIn, Google Search, and Meta.', range: '$18,000–$22,000', tag: 'Ramp-up', bar: 44 },
+    { cat: 'Q1 2027 (Jan–Mar)', detail: 'Full activation. All segments, both markets, all channels, and consolidation.', range: '$26,000–$30,000', tag: 'Full activation', bar: 60 },
+    { cat: 'Phase 1 carryovers', detail: 'SEMrush annual subscription, video production if renewed, and CRM optimization internal labor.', range: 'Outside cap', tag: 'Not counted', bar: 22 }
+  ];
+
+  const DEFAULT_WAVES = [
+    { name: 'Wave 1', tag: 'Sep 2026', channels: 'Meta only', desc: 'Content push and initial audience building at low spend. Meta runs engagement, video views, and starts driving traffic to the new website. Sets the baseline before paid search and LinkedIn enter.' },
+    { name: 'Wave 2', tag: 'Oct–Nov 2026', channels: 'LinkedIn + Google Search + Meta', desc: 'LinkedIn enters in October. Google Search enters in November. First priority segment per market. Proves the full measurement chain end to end: ad to click to form submission to CRM. First readable cost baseline established.' },
+    { name: 'Wave 3', tag: 'Dec 2026–Jan 2027', channels: 'All channels', desc: 'All priority segments activated across both markets. UAE and KSA approaches sharpened with market-specific weighting. Future-track content tested alongside conventional. Second and third segments enter.' },
+    { name: 'Wave 4', tag: 'Feb–Mar 2027', channels: 'All channels', desc: 'Consolidation. Best-performing content, channel, and market combinations re-run to confirm the numbers hold. SEO progress measured. The verified picture is locked.' },
+    { name: 'Phase 2 Outcomes', tag: 'End Mar 2027', channels: 'Handoff', desc: 'Verified numbers assembled. Costed Phase 3 scaling plan presented. Phase 2 closes by handing Phase 3 a business case built on data.' }
+  ];
+
+  function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+  let savedState = {};
+  try { savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch (error) { savedState = {}; }
+
+  let workstreams = Array.isArray(savedState.workstreams) ? savedState.workstreams : deepClone(DEFAULT_WORKSTREAMS);
+  let budgetLines = Array.isArray(savedState.budgetLines) ? savedState.budgetLines : deepClone(DEFAULT_BUDGET);
+  let waves = Array.isArray(savedState.waves) ? savedState.waves : deepClone(DEFAULT_WAVES);
+  let textOverrides = savedState.textOverrides || {};
+  let activePillar = savedState.activePillar || 'objectives';
+
+  const body = document.getElementById('body');
+  const phaseStrip = document.getElementById('phaseStrip');
+  const metrics = document.getElementById('metrics');
+
+
+  const SYNC_CONFIG = window.DASHBOARD_SYNC || {};
+  const SUPABASE_TABLE = 'dashboard_pages';
+  const supabaseClient = (window.supabase && SYNC_CONFIG.SUPABASE_URL && SYNC_CONFIG.SUPABASE_ANON_KEY && !String(SYNC_CONFIG.SUPABASE_URL).includes('YOUR-PROJECT'))
+    ? window.supabase.createClient(SYNC_CONFIG.SUPABASE_URL, SYNC_CONFIG.SUPABASE_ANON_KEY)
+    : null;
+  let syncReady = false;
+  let suppressRemoteSave = false;
+  let remoteSaveTimer = null;
+
+  function cloneForSync(value) { return JSON.parse(JSON.stringify(value)); }
+  function getDashboardState() {
+    const state = { workstreams, budgetLines, textOverrides, activePillar, savedAt: new Date().toISOString() };
+    if (typeof waves !== 'undefined') state.waves = waves;
+    return state;
+  }
+  function setSyncStatus(message, mode = '') {
+    const el = document.getElementById('syncStatus');
+    if (!el) return;
+    el.textContent = message;
+    el.className = 'sync-status' + (mode ? ' ' + mode : '');
+  }
+  function saveLocalState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getDashboardState())); }
+  function saveState() {
+    saveLocalState();
+    if (!suppressRemoteSave) scheduleRemoteSave();
+  }
+  function scheduleRemoteSave() {
+    if (!supabaseClient) { setSyncStatus('Local only: add Supabase config', 'warn'); return; }
+    if (!syncReady) { setSyncStatus('Connecting sync…', 'saving'); return; }
+    clearTimeout(remoteSaveTimer);
+    setSyncStatus('Saving…', 'saving');
+    remoteSaveTimer = setTimeout(() => pushRemoteState(), 450);
+  }
+  async function pushRemoteState() {
+    if (!supabaseClient) return;
+    const payload = { id: PAGE_ID, content: getDashboardState(), updated_at: new Date().toISOString() };
+    const { error } = await supabaseClient.from(SUPABASE_TABLE).upsert(payload, { onConflict: 'id' });
+    if (error) { console.error(error); setSyncStatus('Sync error', 'error'); return; }
+    setSyncStatus('Synced', 'synced');
+  }
+  function applyDashboardState(state) {
+    if (!state || typeof state !== 'object') return;
+    if (Array.isArray(state.workstreams)) workstreams = cloneForSync(state.workstreams);
+    if (Array.isArray(state.budgetLines)) budgetLines = cloneForSync(state.budgetLines);
+    if (typeof DEFAULT_WAVES !== 'undefined' && typeof waves !== 'undefined' && Array.isArray(state.waves)) waves = cloneForSync(state.waves);
+    textOverrides = state.textOverrides && typeof state.textOverrides === 'object' ? cloneForSync(state.textOverrides) : {};
+    activePillar = state.activePillar || activePillar || 'objectives';
+    saveLocalState();
+    renderMetrics();
+    renderPhaseStrip();
+    setPillar(activePillar);
+    initStaticEditables();
+    setSyncStatus('Synced live', 'synced');
+  }
+  async function initRemoteSync() {
+    if (!supabaseClient) { setSyncStatus('Local only: add Supabase config', 'warn'); return; }
+    setSyncStatus('Connecting sync…', 'saving');
+    const { data, error } = await supabaseClient.from(SUPABASE_TABLE).select('content').eq('id', PAGE_ID).maybeSingle();
+    if (error) { console.error(error); setSyncStatus('Sync setup error', 'error'); return; }
+    syncReady = true;
+    if (data && data.content) {
+      suppressRemoteSave = true;
+      applyDashboardState(data.content);
+      suppressRemoteSave = false;
+    } else {
+      await pushRemoteState();
+    }
+    supabaseClient
+      .channel('dashboard-sync-' + PAGE_ID)
+      .on('postgres_changes', { event: '*', schema: 'public', table: SUPABASE_TABLE, filter: 'id=eq.' + PAGE_ID }, payload => {
+        if (!payload.new || !payload.new.content) return;
+        suppressRemoteSave = true;
+        applyDashboardState(payload.new.content);
+        suppressRemoteSave = false;
+      })
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') setSyncStatus('Live sync on', 'synced');
+      });
+  }
+  async function resetDashboardEverywhere() {
+    if (!confirm('Reset all text edits and KPI ordering for everyone viewing this dashboard?')) return;
+    workstreams = cloneForSync(DEFAULT_WORKSTREAMS);
+    if (typeof DEFAULT_BUDGET_LINES !== 'undefined') budgetLines = cloneForSync(DEFAULT_BUDGET_LINES);
+    if (typeof DEFAULT_BUDGET !== 'undefined') budgetLines = cloneForSync(DEFAULT_BUDGET);
+    if (typeof DEFAULT_WAVES !== 'undefined' && typeof waves !== 'undefined') waves = cloneForSync(DEFAULT_WAVES);
+    textOverrides = {};
+    activePillar = 'objectives';
+    localStorage.removeItem(STORAGE_KEY);
+    saveLocalState();
+    if (supabaseClient && syncReady) await pushRemoteState();
+    window.location.reload();
+  }
+
+  function escapeHTML(value) { return String(value ?? '').replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char])); }
+  function escapeAttr(value) { return escapeHTML(value).replace(/'/g, '&#39;'); }
+  function editableStatic(key, value, tag = 'span', className = '', attrs = '') {
+    const actual = Object.prototype.hasOwnProperty.call(textOverrides, key) ? textOverrides[key] : value;
+    return `<${tag} class="${className} editable-text" contenteditable="plaintext-only" spellcheck="false" data-edit-key="${escapeAttr(key)}" ${attrs}>${escapeHTML(actual)}</${tag}>`;
+  }
+  function editableBound({ value, tag = 'span', className = '', bindType, attrs = '', wsId = '', itemIndex = '', budgetIndex = '', waveIndex = '', field = '' }) {
+    return `<${tag} class="${className} editable-text" contenteditable="plaintext-only" spellcheck="false" data-bind-type="${escapeAttr(bindType)}" data-ws-id="${escapeAttr(wsId)}" data-item-index="${escapeAttr(itemIndex)}" data-budget-index="${escapeAttr(budgetIndex)}" data-wave-index="${escapeAttr(waveIndex)}" data-field="${escapeAttr(field)}" ${attrs}>${escapeHTML(value)}</${tag}>`;
+  }
+  function getTextValue(el) { return el.innerText.replace(/\u00a0/g, ' ').trim(); }
+  function pulseSaved(el) { el.classList.remove('pulse-saved'); void el.offsetWidth; el.classList.add('pulse-saved'); }
+  function applyStaticEditable(selector, key) {
+    const el = document.querySelector(selector); if (!el) return;
+    el.classList.add('editable-text'); el.setAttribute('contenteditable', 'plaintext-only'); el.setAttribute('spellcheck', 'false'); el.dataset.editKey = key;
+    if (Object.prototype.hasOwnProperty.call(textOverrides, key)) el.textContent = textOverrides[key]; else textOverrides[key] = el.textContent.trim();
+  }
+  function initStaticEditables() {
+    applyStaticEditable('.eyebrow', 'hero.eyebrow');
+    applyStaticEditable('#pageTitle', 'hero.title');
+    applyStaticEditable('.hero-copy', 'hero.copy');
+    document.querySelectorAll('.meta-chip').forEach((el, index) => applyStaticEditable(`.meta-chip:nth-child(${index + 1})`, `hero.meta.${index}`));
+    applyStaticEditable('.status-label', 'hero.status.label');
+    applyStaticEditable('.status-main', 'hero.status.main');
+    applyStaticEditable('.status-sub', 'hero.status.sub');
+    applyStaticEditable('.mini-progress-top span:first-child', 'hero.progress.label');
+    applyStaticEditable('.mini-progress-top span:last-child', 'hero.progress.value');
+    applyStaticEditable('.edit-toolbar > span', 'toolbar.copy');
+    applyStaticEditable('.section-label span:first-child', 'strip.label.left');
+    applyStaticEditable('.section-label span:last-child', 'strip.label.right');
+    document.querySelectorAll('.pillar').forEach((pillar, index) => {
+      applyStaticEditable(`.pillar:nth-child(${index + 1}) .pillar-letter`, `pillar.${index}.letter`);
+      applyStaticEditable(`.pillar:nth-child(${index + 1}) .pillar-name`, `pillar.${index}.name`);
+      applyStaticEditable(`.pillar:nth-child(${index + 1}) .pillar-desc`, `pillar.${index}.desc`);
+    });
+    applyStaticEditable('.foot-note', 'footer.note');
+    saveState();
+  }
+
+  function updateBoundValue(el, value) {
+    const { bindType, wsId, itemIndex, budgetIndex, waveIndex, field } = el.dataset;
+    if (bindType === 'workstream') {
+      const ws = workstreams.find(item => item.id === wsId); if (ws && field) ws[field] = value;
+    }
+    if (bindType === 'item') {
+      const ws = workstreams.find(item => item.id === wsId); const item = ws && ws.items[Number(itemIndex)]; if (item && field) item[field] = value;
+    }
+    if (bindType === 'budget') {
+      const item = budgetLines[Number(budgetIndex)]; if (item && field) item[field] = value;
+    }
+    if (bindType === 'wave') {
+      const wave = waves[Number(waveIndex)]; if (wave && field) wave[field] = value;
+    }
+  }
+
+  function animateBody() { body.classList.remove('fade'); void body.offsetWidth; body.classList.add('fade'); }
+  function statusClass(status) { return 'sp-' + String(status || 'measure').toLowerCase(); }
+  function getNextMilestoneIndex(ws) { return 0; }
+
+  function renderMetrics() {
+    const itemCount = workstreams.reduce((sum, ws) => sum + ws.items.length, 0);
+    const cards = [
+      { key: 'metric.1', num: '$50K', label: 'Testing allocation cap' },
+      { key: 'metric.2', num: '6', label: 'Testing workstreams' },
+      { key: 'metric.3', num: String(itemCount), label: 'KPI and validation items' },
+      { key: 'metric.4', num: '3', label: 'Paid media channels' },
+      { key: 'metric.5', num: '2', label: 'Priority markets: UAE and KSA' }
+    ];
+    metrics.innerHTML = cards.map(card => `<div class="metric-card">${editableStatic(card.key + '.num', card.num, 'strong')}${editableStatic(card.key + '.label', card.label, 'span')}</div>`).join('');
+  }
+
+  function renderPhaseStrip() {
+    phaseStrip.innerHTML = '';
+    STRIP.forEach((m, index) => {
+      const div = document.createElement('div');
+      div.className = 'phase-month ' + m.cls;
+      div.innerHTML = `${editableStatic('phase.strip.' + index + '.label', m.label, 'div', 'phase-name')}${editableStatic('phase.strip.' + index + '.marker', m.marker, 'span', 'marker')}`;
+      phaseStrip.appendChild(div);
+    });
+  }
+
+  function viewObjectives() {
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('objectives.title', 'Why Phase 2 exists', 'div', 'view-title')}${editableStatic('objectives.sub', 'Phase 1 built the machine. Phase 2 turns it on with controlled spend for the first time.', 'div', 'view-sub')}</div>${editableStatic('objectives.tag', 'Spend to learn', 'div', 'view-tag')}</div><div class="obj-layout"><section class="obj-purpose">${editableStatic('objectives.purpose.label', 'Operating principle', 'div', 'obj-purpose-label')}${editableStatic('objectives.purpose.title', 'Prove the model before scaling the spend.', 'h3')}${editableStatic('objectives.purpose.copy', 'Run controlled campaigns across LinkedIn, Google Search, and Meta. Measure the real cost of reaching our target audience, engaging them, and converting them into qualified opportunities. Come out with verified numbers, not narratives. The entire testing budget exists to make Phase 3 a calculated decision.', 'p')}</section><div class="obj-principles"><div class="principle">${editableStatic('objectives.principle.1.label', 'Principle 01', 'div', 'principle-label')}${editableStatic('objectives.principle.1.title', 'Spend to learn, not to scale', 'div', 'principle-title')}${editableStatic('objectives.principle.1.copy', 'Controlled budget that proves the model before the business commits at scale.', 'div', 'principle-text')}</div><div class="principle">${editableStatic('objectives.principle.2.label', 'Principle 02', 'div', 'principle-label')}${editableStatic('objectives.principle.2.title', 'Measured in opportunity economics', 'div', 'principle-title')}${editableStatic('objectives.principle.2.copy', 'Cost per qualified click, cost per form submission, and cost per qualified opportunity, per channel, per segment, per market.', 'div', 'principle-text')}</div><div class="principle tactical">${editableStatic('objectives.principle.3.label', 'Principle 03 · Key output', 'div', 'principle-label')}${editableStatic('objectives.principle.3.title', 'Phase 3 business case', 'div', 'principle-title')}${editableStatic('objectives.principle.3.copy', 'Without these numbers, Phase 3 is guessing. With them, it is calculated.', 'div', 'principle-text')}</div></div></div>`;
+    animateBody();
+  }
+
+  function viewDeliverables() {
+    const itemCount = workstreams.reduce((sum, ws) => sum + ws.items.length, 0);
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('deliverables.title', 'Six workstreams that prove the model', 'div', 'view-title')}${editableStatic('deliverables.sub', `Click any workstream to see the detailed KPI list. Opened KPI rows can be reordered by drag and drop.`, 'div', 'view-sub')}</div>${editableStatic('deliverables.tag', `${itemCount} KPI items`, 'div', 'view-tag')}</div><div class="ws-grid" id="wsGrid"></div>`;
+    const grid = document.getElementById('wsGrid');
+    workstreams.forEach(ws => {
+      const nextIndex = getNextMilestoneIndex(ws); const next = ws.items[nextIndex] || { text: '' };
+      const card = document.createElement('div');
+      card.className = 'ws-card'; card.setAttribute('role', 'button'); card.setAttribute('tabindex', '0');
+      card.innerHTML = `<div class="ws-num">${String(ws.num).padStart(2, '0')}</div><div><div class="ws-title-row">${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'ws-title' })}${editableBound({ value: ws.tag, bindType: 'workstream', wsId: ws.id, field: 'tag', tag: 'div', className: 'ws-prog' })}</div>${editableBound({ value: ws.sub, bindType: 'workstream', wsId: ws.id, field: 'sub', tag: 'div', className: 'ws-sub' })}<div class="ws-progress-bar" aria-hidden="true"><span style="width:${Math.min(100, Math.round((ws.items.length / 8) * 100))}%"></span></div><div class="next-milestone"><strong>Testing focus:</strong> ${editableBound({ value: next.text, bindType: 'item', wsId: ws.id, itemIndex: nextIndex, field: 'text' })}</div></div>`;
+      card.addEventListener('click', event => { if (event.target.closest('.editable-text')) return; viewWorkstream(ws.id); });
+      card.addEventListener('keydown', event => { if (event.target.closest('.editable-text')) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); viewWorkstream(ws.id); } });
+      grid.appendChild(card);
+    });
+    animateBody();
+  }
+
+  function viewWorkstream(id) {
+    const ws = workstreams.find(w => w.id === id); if (!ws) return;
+    body.innerHTML = `<div class="view-head"><div>${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'view-title' })}<div class="view-sub">${editableStatic('workstream.detail.prefix.' + ws.id, `Workstream ${ws.num} of 6 ·`, 'span')} ${editableBound({ value: ws.desc, bindType: 'workstream', wsId: ws.id, field: 'desc' })}</div></div>${editableBound({ value: ws.tag, bindType: 'workstream', wsId: ws.id, field: 'tag', tag: 'div', className: 'view-tag' })}</div><div class="workstream-brief"><div class="brief-card primary">${editableStatic('workstream.detail.focusLabel.' + ws.id, 'Testing focus', 'div', 'brief-label')}${editableBound({ value: ws.sub, bindType: 'workstream', wsId: ws.id, field: 'sub', tag: 'div', className: 'brief-value' })}</div><div class="brief-card">${editableStatic('workstream.detail.itemsLabel.' + ws.id, 'KPI items', 'div', 'brief-label')}${editableStatic('workstream.detail.itemsValue.' + ws.id, ws.items.length, 'div', 'brief-value')}</div><div class="brief-card">${editableStatic('workstream.detail.phaseLabel.' + ws.id, 'Phase role', 'div', 'brief-label')}${editableBound({ value: ws.tag, bindType: 'workstream', wsId: ws.id, field: 'tag', tag: 'div', className: 'brief-value' })}</div></div><div class="items-head"><span class="ih-label">KPIs and validation steps</span><span class="drag-note">Drag rows to rearrange</span></div><div class="item-list" id="wsItems"></div><div class="outcome-box"><div class="outcome-label">What it produces</div>${editableBound({ value: ws.outcome, bindType: 'workstream', wsId: ws.id, field: 'outcome', tag: 'div', className: 'outcome-text' })}</div><button class="back-btn" id="wsBack" type="button">← Back to workstreams</button>`;
+    const itemsEl = document.getElementById('wsItems');
+    ws.items.forEach((it, index) => {
+      const row = document.createElement('div'); row.className = 'item-row'; row.setAttribute('draggable', 'true'); row.dataset.index = index;
+      row.innerHTML = `<span class="drag-handle" title="Drag to reorder">⋮⋮</span>${editableBound({ value: it.pill, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'pill', tag: 'span', className: `status-pill ${statusClass(it.status)}` })}${editableBound({ value: it.text, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'text', tag: 'span', className: 'item-text' })}${editableBound({ value: it.when, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'when', tag: 'span', className: 'item-when' })}`;
+      itemsEl.appendChild(row);
+    });
+    enableKPIDragDrop(ws, itemsEl);
+    document.getElementById('wsBack').addEventListener('click', viewDeliverables);
+    animateBody();
+  }
+
+  function enableKPIDragDrop(ws, listEl) {
+    listEl.addEventListener('dragstart', event => { if (event.target.closest('.editable-text')) { event.preventDefault(); return; } const row = event.target.closest('.item-row'); if (!row) return; row.classList.add('dragging'); listEl.classList.add('drag-active'); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', row.dataset.index); });
+    listEl.addEventListener('dragover', event => { event.preventDefault(); const dragging = listEl.querySelector('.dragging'); if (!dragging) return; const afterElement = getDragAfterElement(listEl, event.clientY); if (afterElement == null) listEl.appendChild(dragging); else listEl.insertBefore(dragging, afterElement); });
+    listEl.addEventListener('drop', event => { event.preventDefault(); const rows = Array.from(listEl.querySelectorAll('.item-row')); const reordered = rows.map(row => ws.items[Number(row.dataset.index)]).filter(Boolean); if (reordered.length === ws.items.length) { ws.items = reordered; saveState(); viewWorkstream(ws.id); } });
+    listEl.addEventListener('dragend', () => { listEl.classList.remove('drag-active'); listEl.querySelectorAll('.dragging').forEach(row => row.classList.remove('dragging')); });
+  }
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.item-row:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2; if (offset < 0 && offset > closest.offset) return { offset, element: child }; return closest; }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  function viewBudget() {
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('budget.title', 'Phase 2 testing budget', 'div', 'view-title')}${editableStatic('budget.sub', 'Total cap across six months, September 2026 through March 2027. In USD.', 'div', 'view-sub')}</div>${editableStatic('budget.tag', '$50K cap', 'div', 'view-tag')}</div><div class="budget-top"><section class="budget-hero">${editableStatic('budget.hero.label', 'Total Phase 2 testing allocation', 'div', 'budget-hero-label')}${editableStatic('budget.hero.num', '$50,000 USD', 'div', 'budget-hero-num')}${editableStatic('budget.hero.unit', 'Maximum across six months · ~183,500 AED', 'div', 'budget-hero-unit')}${editableStatic('budget.hero.note', 'Deliberately a fraction of what Phase 3 scaling will require. Its only job is to produce the verified numbers that make the larger spend a calculated decision.', 'div', 'budget-hero-note')}</section><aside class="budget-side"><div class="budget-stat">${editableStatic('budget.stat.1.label', 'Duration', 'div', 'budget-stat-label')}${editableStatic('budget.stat.1.value', '6 months', 'div', 'budget-stat-num')}</div><div class="budget-stat">${editableStatic('budget.stat.2.label', 'Channels', 'div', 'budget-stat-label')}${editableStatic('budget.stat.2.value', '3 (LinkedIn, Google, Meta)', 'div', 'budget-stat-num')}</div><div class="budget-stat">${editableStatic('budget.stat.3.label', 'Markets', 'div', 'budget-stat-label')}${editableStatic('budget.stat.3.value', '2 (UAE, KSA)', 'div', 'budget-stat-num')}</div></aside></div><div class="budget-breakdown" id="budgetBars"></div><div class="budget-table-wrap"><table class="budget-table"><thead><tr><th>${editableStatic('budget.table.quarter', 'Quarter')}</th><th>${editableStatic('budget.table.allocation', 'Allocation')}</th><th>${editableStatic('budget.table.channels', 'Channels active')}</th></tr></thead><tbody id="budgetRows"></tbody></table></div>${editableStatic('budget.notes', 'Channel cost anchors: LinkedIn $1,000 per 20K impressions, $10 average CPC. Google Search provisional $10–$15 CPC, confirmed by Phase 1 keyword work. Meta at lower cost for engagement, video views, and high-volume website traffic. Additional running costs carried from Phase 1 are not counted against this cap.', 'div', 'budget-notes')}`;
+    const bars = document.getElementById('budgetBars');
+    budgetLines.forEach((b, index) => {
+      const row = document.createElement('div'); row.className = 'budget-bar-row';
+      row.innerHTML = `${editableBound({ value: b.cat, bindType: 'budget', budgetIndex: index, field: 'cat', tag: 'div', className: 'budget-bar-label' })}<div class="budget-bar-track"><span style="width:${b.bar}%"></span></div>${editableBound({ value: b.range, bindType: 'budget', budgetIndex: index, field: 'range', tag: 'div', className: 'budget-bar-value' })}`;
+      bars.appendChild(row);
+    });
+    const rows = document.getElementById('budgetRows');
+    budgetLines.forEach((b, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${editableBound({ value: b.cat, bindType: 'budget', budgetIndex: index, field: 'cat', tag: 'div', className: 'b-cat' })}${editableBound({ value: b.detail, bindType: 'budget', budgetIndex: index, field: 'detail', tag: 'div', className: 'b-detail' })}</td><td>${editableBound({ value: b.range, bindType: 'budget', budgetIndex: index, field: 'range', tag: 'strong' })}</td><td>${editableBound({ value: b.tag, bindType: 'budget', budgetIndex: index, field: 'tag', tag: 'span', className: 'b-tag' })}</td>`;
+      rows.appendChild(tr);
+    });
+    animateBody();
+  }
+
+  function viewTimeframe() {
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('timeframe.title', 'Four waves from September to March', 'div', 'view-title')}${editableStatic('timeframe.sub', 'Sequenced. Each wave is funded long enough to produce readable results. Each wave’s learning feeds the next.', 'div', 'view-sub')}</div>${editableStatic('timeframe.tag', 'Sep–Mar', 'div', 'view-tag')}</div><div class="roadmap" id="waves"></div>${editableStatic('timeframe.dependency', 'Dependency: Dynamics CRM assumed live at website launch. If it slips, lead-capture testing shifts but content and channel testing proceeds. Continuous tracks: SEO build and CRM optimization run throughout, not tied to waves.', 'div', 'wave-dep')}`;
+    const wavesEl = document.getElementById('waves');
+    waves.forEach((w, index) => {
+      const card = document.createElement('section'); card.className = 'roadmap-card';
+      card.innerHTML = `<div class="roadmap-month"><div>${editableBound({ value: w.name, bindType: 'wave', waveIndex: index, field: 'name', tag: 'div', className: 'roadmap-month-name' })}${editableBound({ value: w.channels, bindType: 'wave', waveIndex: index, field: 'channels', tag: 'div', className: 'roadmap-count' })}</div>${editableBound({ value: w.tag, bindType: 'wave', waveIndex: index, field: 'tag', tag: 'span', className: 'roadmap-tag' })}</div><div class="roadmap-channels">${editableStatic('timeframe.wave.' + index + '.channelsLabel', 'Channels:', 'span')} ${editableBound({ value: w.channels, bindType: 'wave', waveIndex: index, field: 'channels' })}</div>${editableBound({ value: w.desc, bindType: 'wave', waveIndex: index, field: 'desc', tag: 'div', className: 'roadmap-desc' })}`;
+      wavesEl.appendChild(card);
+    });
+    animateBody();
+  }
+
+  function setPillar(name) {
+    activePillar = name; saveState();
+    document.querySelectorAll('.pillar').forEach(p => { const isActive = p.dataset.pillar === name; p.classList.toggle('active', isActive); p.setAttribute('aria-pressed', String(isActive)); });
+    if (name === 'objectives') viewObjectives(); else if (name === 'deliverables') viewDeliverables(); else if (name === 'budget') viewBudget(); else if (name === 'timeframe') viewTimeframe();
+  }
+
+  document.addEventListener('blur', event => {
+    const el = event.target.closest('.editable-text'); if (!el) return;
+    const value = getTextValue(el);
+    if (el.dataset.bindType) updateBoundValue(el, value); else if (el.dataset.editKey) textOverrides[el.dataset.editKey] = value;
+    saveState(); pulseSaved(el);
+  }, true);
+  document.addEventListener('keydown', event => {
+    const el = event.target.closest('.editable-text'); if (!el) return;
+    if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); el.blur(); }
+    if (event.key === 'Escape') { event.preventDefault(); el.blur(); setPillar(activePillar); initStaticEditables(); }
+  });
+  document.addEventListener('paste', event => {
+    const el = event.target.closest('.editable-text'); if (!el) return;
+    event.preventDefault(); const text = (event.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text);
+  });
+  document.querySelectorAll('.pillar').forEach(p => {
+    p.addEventListener('click', event => { if (event.target.closest('.editable-text')) return; setPillar(p.dataset.pillar); });
+    p.addEventListener('keydown', event => { if (event.target.closest('.editable-text')) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPillar(p.dataset.pillar); } });
+  });
+  document.getElementById('resetEdits').addEventListener('click', resetDashboardEverywhere);
+  document.getElementById('exportState').addEventListener('click', () => {
+    const payload = JSON.stringify({ workstreams, budgetLines, waves, textOverrides }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' }); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'phase-2-dashboard-edits.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
+
+  renderMetrics(); renderPhaseStrip(); initStaticEditables(); setPillar(activePillar); initRemoteSync();
+</script>
+</body>
+</html>

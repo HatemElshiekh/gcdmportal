@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Marketing Plan — Live Phases</title>
+<style>
+  :root { --navy:#365888; --navy-dark:#213a5d; --ink:#182333; --muted:#7c858c; --line:#e4e9ef; --bg:#f6f8fb; --white:#fff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; min-height:100vh; color:var(--ink); background: radial-gradient(circle at top left, rgba(54,88,136,0.14), transparent 32%), linear-gradient(180deg,#f7f9fc 0%,#fff 100%); }
+  .app { max-width:1180px; margin:0 auto; padding:28px; }
+  .top-nav { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:22px; padding:10px 12px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,0.82); box-shadow:0 12px 30px rgba(31,42,55,0.05); backdrop-filter:blur(12px); }
+  .brand { color:var(--navy); font-weight:800; font-size:13px; }
+  .links { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+  .links a { color:var(--muted); text-decoration:none; font-size:12px; font-weight:800; padding:8px 11px; border-radius:999px; }
+  .links a:hover, .links a.active-page { background:var(--navy); color:#fff; }
+  .hero { position:relative; overflow:hidden; border-radius:28px; padding:46px; color:#fff; background:linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 62%, #6181B4 100%); box-shadow:0 28px 70px rgba(31,42,55,0.16); }
+  .hero:after { content:''; position:absolute; right:-90px; top:-120px; width:360px; height:360px; border-radius:50%; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.07); }
+  .eyebrow { text-transform:uppercase; letter-spacing:1.7px; font-size:12px; font-weight:800; color:rgba(255,255,255,0.72); margin-bottom:12px; }
+  h1 { max-width:760px; font-size:clamp(34px,5vw,64px); line-height:1.02; letter-spacing:-1.5px; margin-bottom:16px; }
+  .hero p { max-width:720px; color:rgba(255,255,255,0.84); font-size:17px; line-height:1.65; }
+  .grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; margin-top:24px; }
+  .card { display:flex; flex-direction:column; min-height:270px; padding:26px; border:1px solid var(--line); border-radius:24px; background:#fff; box-shadow:0 18px 45px rgba(31,42,55,0.07); text-decoration:none; color:inherit; transition:transform .18s ease, box-shadow .18s ease; }
+  .card:hover { transform:translateY(-3px); box-shadow:0 24px 60px rgba(31,42,55,0.11); }
+  .card .kicker { color:var(--muted); font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .card h2 { color:var(--navy); font-size:28px; margin-bottom:10px; }
+  .card p { color:var(--muted); font-size:14px; line-height:1.65; flex:1; }
+  .meta { display:flex; gap:8px; flex-wrap:wrap; margin-top:22px; }
+  .pill { padding:7px 10px; border-radius:999px; background:#eef3f8; color:var(--navy); font-size:11px; font-weight:800; }
+  .note { margin-top:18px; padding:16px 18px; border-left:4px solid var(--navy); border-radius:12px; background:#fff; color:var(--muted); font-size:13px; line-height:1.6; box-shadow:0 12px 35px rgba(31,42,55,0.05); }
+  @media(max-width:760px){ .app{padding:18px;} .top-nav{align-items:flex-start; flex-direction:column;} .hero{padding:30px;} .grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="top-nav" aria-label="Site navigation">
+    <div class="brand">Digital Marketing Plan</div>
+    <div class="links">
+      <a href="index.html" class="active-page">Overview</a>
+      <a href="phase-1.html">Phase 1: Foundation</a>
+      <a href="phase-2.html">Phase 2: Testing</a>
+    </div>
+  </nav>
+  <section class="hero">
+    <div class="eyebrow">Live Executive Dashboard</div>
+    <h1>Digital Marketing Plan Phases</h1>
+    <p>Linked live dashboards for Phase 1 and Phase 2. Edits are saved to Supabase and synchronize for everyone viewing the same link.</p>
+  </section>
+  <section class="grid" aria-label="Phase dashboards">
+    <a class="card" href="phase-1.html">
+      <div class="kicker">April to August 2026</div>
+      <h2>Phase 1: Foundation</h2>
+      <p>Build the digital marketing operating system: conversion-led website, content base, SEO foundation, CRM integration, measurement, and launch readiness.</p>
+      <div class="meta"><span class="pill">4 pillars</span><span class="pill">8 workstreams</span><span class="pill">Editable</span></div>
+    </a>
+    <a class="card" href="phase-2.html">
+      <div class="kicker">September 2026 to March 2027</div>
+      <h2>Phase 2: Testing</h2>
+      <p>Run controlled spend to validate real channel, content, market, and opportunity economics before scaling into Phase 3.</p>
+      <div class="meta"><span class="pill">4 pillars</span><span class="pill">6 workstreams</span><span class="pill">Editable</span></div>
+    </a>
+  </section>
+  <div class="note"><strong>Shared edits:</strong> after you connect Supabase in <code>config.js</code>, any manager with the link can edit, and those edits will save into the same cloud record for everyone.</div>
+</div>
+</body>
+</html>

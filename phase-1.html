@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 1: Foundation — Executive Digital Marketing Dashboard</title>
+<style>
+  :root {
+    --navy: #365888;
+    --navy-dark: #203a5e;
+    --navy-deep: #172b47;
+    --navy-soft: #eef3f8;
+    --navy-soft-2: #dde8f3;
+    --blue-mid: #6181B4;
+    --blue-light: #9EAECA;
+    --grey: #909496;
+    --grey-dark: #5b5e61;
+    --grey-soft: #f2f4f6;
+    --ink: #172033;
+    --muted: #6f7780;
+    --line: #e3e8ef;
+    --bg: #f6f8fb;
+    --white: #ffffff;
+    --done: #1d9e75;
+    --done-bg: #e8f5f0;
+    --progress: #ba7517;
+    --progress-bg: #f8efe2;
+    --scheduled: #365888;
+    --scheduled-bg: #eef3f8;
+    --ongoing: #767b7e;
+    --ongoing-bg: #eceeef;
+    --shadow-soft: 0 18px 50px rgba(31, 42, 55, 0.08);
+    --shadow-card: 0 10px 28px rgba(31, 42, 55, 0.07);
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 8% 0%, rgba(54, 88, 136, 0.16), transparent 34%),
+      radial-gradient(circle at 88% 12%, rgba(97, 129, 180, 0.13), transparent 30%),
+      linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button, input, select { font: inherit; }
+
+  .app {
+    width: min(1400px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 28px 0 34px;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.18), transparent 20%),
+      linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 58%, #466b9d 100%);
+    color: var(--white);
+    min-height: 252px;
+    padding: 34px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .hero::before,
+  .hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+
+  .hero::before {
+    width: 340px;
+    height: 340px;
+    right: -86px;
+    top: -118px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .hero::after {
+    width: 180px;
+    height: 180px;
+    left: 54%;
+    bottom: -90px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.76);
+    font-weight: 800;
+  }
+
+  .hero h1 {
+    max-width: 760px;
+    font-size: clamp(38px, 5vw, 68px);
+    line-height: 0.98;
+    letter-spacing: -2.2px;
+    margin-top: 12px;
+    font-weight: 800;
+  }
+
+  .hero-copy {
+    max-width: 740px;
+    margin-top: 18px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.88);
+    padding: 9px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    backdrop-filter: blur(12px);
+  }
+
+  .hero-status {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 22px;
+    backdrop-filter: blur(14px);
+  }
+
+  .status-label {
+    color: rgba(255, 255, 255, 0.70);
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .status-main {
+    margin-top: 8px;
+    font-size: 34px;
+    letter-spacing: -1px;
+    font-weight: 800;
+  }
+
+  .status-sub {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .mini-progress {
+    margin-top: 20px;
+  }
+
+  .mini-progress-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .mini-track {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+  }
+
+  .mini-fill {
+    display: block;
+    height: 100%;
+    width: 27%;
+    border-radius: inherit;
+    background: var(--white);
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin: 18px 0;
+  }
+
+  .metric-card {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 18px;
+    padding: 16px 16px 15px;
+    box-shadow: 0 12px 30px rgba(31, 42, 55, 0.05);
+    backdrop-filter: blur(12px);
+  }
+
+  .metric-card strong {
+    display: block;
+    color: var(--navy);
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.7px;
+    font-weight: 800;
+  }
+
+  .metric-card span {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .phase-strip-wrap {
+    margin-bottom: 18px;
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 2px 9px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  .phase-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .phase-month {
+    position: relative;
+    min-height: 72px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.84);
+    border-radius: 16px;
+    padding: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(31, 42, 55, 0.04);
+  }
+
+  .phase-month::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 4px;
+    background: var(--navy-soft-2);
+  }
+
+  .phase-month.past::before { background: var(--done); }
+  .phase-month.current::before { background: var(--progress); }
+  .phase-month.future::before { background: var(--navy); }
+
+  .phase-name {
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .phase-month.past .phase-name { color: var(--done); }
+  .phase-month.current .phase-name { color: var(--progress); }
+  .phase-month.future .phase-name { color: var(--navy); }
+
+  .marker {
+    display: inline-flex;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .pillar {
+    position: relative;
+    overflow: hidden;
+    min-height: 168px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 21px;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    box-shadow: 0 8px 26px rgba(31, 42, 55, 0.04);
+  }
+
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--navy);
+  }
+
+  .pillar::after {
+    content: attr(data-index);
+    position: absolute;
+    right: 18px;
+    bottom: 0px;
+    font-size: 66px;
+    line-height: 0.85;
+    font-weight: 900;
+    color: rgba(54, 88, 136, 0.08);
+    letter-spacing: -4px;
+    pointer-events: none;
+  }
+
+  .pillar:nth-child(2)::before { background: var(--blue-mid); }
+  .pillar:nth-child(3)::before { background: var(--progress); }
+  .pillar:nth-child(4)::before { background: var(--grey-dark); }
+
+  .pillar:hover {
+    transform: translateY(-3px);
+    border-color: rgba(54, 88, 136, 0.42);
+    box-shadow: var(--shadow-card);
+  }
+
+  .pillar:focus-visible {
+    outline: 3px solid rgba(54, 88, 136, 0.24);
+    outline-offset: 3px;
+  }
+
+  .pillar.active {
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 35%),
+      linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    border-color: var(--navy);
+    color: var(--white);
+    box-shadow: 0 18px 42px rgba(54, 88, 136, 0.24);
+  }
+
+  .pillar.active::after { color: rgba(255, 255, 255, 0.11); }
+  .pillar.active::before { background: rgba(255, 255, 255, 0.55); }
+
+  .pillar-letter {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+
+  .pillar.active .pillar-letter { color: rgba(255, 255, 255, 0.68); }
+
+  .pillar-name {
+    position: relative;
+    z-index: 1;
+    margin-top: 14px;
+    color: var(--navy);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+  }
+
+  .pillar.active .pillar-name { color: var(--white); }
+
+  .pillar-desc {
+    position: relative;
+    z-index: 1;
+    max-width: 92%;
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.48;
+  }
+
+  .pillar.active .pillar-desc { color: rgba(255, 255, 255, 0.78); }
+
+  .body-shell {
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    min-height: 560px;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .body-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--navy), var(--blue-mid), var(--blue-light));
+  }
+
+  .body {
+    padding: 32px;
+    animation: fadeUp 0.25s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .view-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: start;
+    margin-bottom: 22px;
+  }
+
+  .view-title {
+    color: var(--navy);
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.08;
+    letter-spacing: -1.1px;
+    font-weight: 850;
+  }
+
+  .view-sub {
+    max-width: 760px;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  .view-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    color: var(--navy);
+    background: var(--navy-soft);
+    border: 1px solid var(--navy-soft-2);
+    border-radius: 999px;
+    padding: 9px 13px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .obj-layout {
+    display: grid;
+    grid-template-columns: 1.04fr 1fr;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .obj-purpose {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.24), transparent 35%),
+      linear-gradient(145deg, var(--navy) 0%, var(--navy-dark) 100%);
+    color: var(--white);
+    border-radius: 22px;
+    padding: 26px;
+    min-height: 100%;
+  }
+
+  .obj-purpose::after {
+    content: '01';
+    position: absolute;
+    right: 18px;
+    bottom: 0;
+    color: rgba(255, 255, 255, 0.10);
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: -5px;
+  }
+
+  .obj-purpose-label {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+  }
+
+  .obj-purpose h3 {
+    max-width: 560px;
+    margin-top: 12px;
+    font-size: 28px;
+    line-height: 1.12;
+    letter-spacing: -0.9px;
+  }
+
+  .obj-purpose p {
+    position: relative;
+    z-index: 1;
+    margin-top: 16px;
+    max-width: 650px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 14px;
+    line-height: 1.72;
+  }
+
+  .obj-principles {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .principle {
+    position: relative;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px 18px 18px 20px;
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .principle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(31, 42, 55, 0.06);
+  }
+
+  .principle::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 4px;
+    border-radius: 99px;
+    background: var(--navy);
+  }
+
+  .principle.tactical {
+    background: var(--navy-soft);
+    border-color: var(--navy-soft-2);
+  }
+
+  .principle-label {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+
+  .principle-title {
+    color: var(--navy);
+    font-size: 16px;
+    font-weight: 850;
+    margin-top: 6px;
+    letter-spacing: -0.25px;
+  }
+
+  .principle-text {
+    color: var(--ink);
+    font-size: 12.8px;
+    line-height: 1.58;
+    margin-top: 7px;
+  }
+
+  .ws-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .ws-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--white);
+    padding: 18px;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .ws-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(54, 88, 136, 0.38);
+    box-shadow: var(--shadow-card);
+    background: #fcfdff;
+  }
+
+  .ws-card:focus-visible {
+    outline: 3px solid rgba(54, 88, 136, 0.22);
+    outline-offset: 3px;
+  }
+
+  .ws-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    background: linear-gradient(145deg, var(--navy), var(--navy-dark));
+    font-size: 18px;
+    font-weight: 900;
+    box-shadow: 0 10px 22px rgba(54, 88, 136, 0.18);
+  }
+
+  .ws-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .ws-title {
+    color: var(--navy);
+    font-size: 16px;
+    font-weight: 850;
+    letter-spacing: -0.3px;
+  }
+
+  .ws-prog {
+    flex-shrink: 0;
+    color: var(--navy);
+    background: var(--navy-soft);
+    border: 1px solid var(--navy-soft-2);
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+
+  .ws-sub {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12.2px;
+    line-height: 1.45;
+  }
+
+  .ws-progress-bar {
+    height: 7px;
+    background: var(--navy-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+
+  .ws-progress-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--navy), var(--blue-mid));
+  }
+
+  .next-milestone {
+    margin-top: 11px;
+    color: var(--muted);
+    font-size: 11.4px;
+    line-height: 1.4;
+  }
+
+  .next-milestone strong { color: var(--ink); }
+
+  .workstream-brief {
+    display: grid;
+    grid-template-columns: 1.2fr repeat(3, minmax(120px, 0.28fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .brief-card {
+    border: 1px solid var(--line);
+    background: var(--white);
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .brief-card.primary {
+    background: var(--navy-soft);
+    border-color: var(--navy-soft-2);
+  }
+
+  .brief-label {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .brief-value {
+    margin-top: 7px;
+    color: var(--navy);
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.4px;
+  }
+
+  .brief-card.primary .brief-value {
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 600;
+  }
+
+  .items-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 6px 0 12px;
+  }
+
+  .items-head .ih-label {
+    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+
+  .item-list {
+    display: grid;
+    gap: 9px;
+  }
+
+  .item-row {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 86px;
+    align-items: start;
+    gap: 12px;
+    border: 1px solid var(--line);
+    background: var(--white);
+    border-radius: 14px;
+    padding: 13px 14px;
+  }
+
+  .item-row.is-done {
+    background: linear-gradient(90deg, var(--done-bg), #ffffff 70%);
+    border-color: rgba(29, 158, 117, 0.16);
+  }
+
+  .item-row.is-progress {
+    background: linear-gradient(90deg, var(--progress-bg), #ffffff 70%);
+    border-color: rgba(186, 117, 23, 0.18);
+  }
+
+  .item-row.is-scheduled {
+    background: linear-gradient(90deg, var(--scheduled-bg), #ffffff 70%);
+  }
+
+  .item-row.is-ongoing {
+    background: linear-gradient(90deg, var(--ongoing-bg), #ffffff 70%);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 24px;
+    border-radius: 999px;
+    color: var(--white);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 5px 8px;
+  }
+
+  .sp-done { background: var(--done); }
+  .sp-progress { background: var(--progress); }
+  .sp-scheduled { background: var(--scheduled); }
+  .sp-ongoing { background: var(--ongoing); }
+
+  .item-text {
+    color: var(--ink);
+    font-size: 12.8px;
+    line-height: 1.45;
+  }
+
+  .item-when {
+    color: var(--muted);
+    text-align: right;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .back-btn {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--navy);
+    background: var(--navy-soft);
+    border: 1px solid var(--navy-soft-2);
+    border-radius: 999px;
+    padding: 11px 16px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background 0.16s ease, transform 0.16s ease;
+  }
+
+  .back-btn:hover {
+    background: var(--navy-soft-2);
+    transform: translateX(-2px);
+  }
+
+  .budget-top {
+    display: grid;
+    grid-template-columns: 1.24fr 0.76fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .budget-hero {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 84% 20%, rgba(255, 255, 255, 0.18), transparent 25%),
+      linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    color: var(--white);
+    border-radius: 22px;
+    padding: 26px;
+    min-height: 230px;
+  }
+
+  .budget-hero::after {
+    content: 'AED';
+    position: absolute;
+    right: 22px;
+    bottom: -9px;
+    color: rgba(255, 255, 255, 0.10);
+    font-size: 74px;
+    font-weight: 900;
+    letter-spacing: -4px;
+  }
+
+  .budget-hero-label {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 10px;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+
+  .budget-hero-num {
+    margin-top: 15px;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1;
+    letter-spacing: -2px;
+    font-weight: 900;
+  }
+
+  .budget-hero-unit {
+    margin-top: 9px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .budget-hero-note {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin-top: 20px;
+    color: rgba(255, 255, 255, 0.80);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .budget-side {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .budget-stat {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 17px;
+  }
+
+  .budget-stat-label {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+
+  .budget-stat-num {
+    color: var(--navy);
+    margin-top: 8px;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+
+  .budget-breakdown {
+    display: grid;
+    gap: 10px;
+    margin: 16px 0 18px;
+  }
+
+  .budget-bar-row {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr) 110px;
+    gap: 14px;
+    align-items: center;
+    border: 1px solid var(--line);
+    background: var(--white);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .budget-bar-label {
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .budget-bar-track {
+    height: 9px;
+    background: var(--navy-soft);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .budget-bar-track span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--navy), var(--blue-mid));
+    border-radius: inherit;
+  }
+
+  .budget-bar-value {
+    color: var(--navy);
+    text-align: right;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .budget-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--white);
+  }
+
+  .budget-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+  }
+
+  .budget-table th {
+    color: var(--muted);
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 900;
+    padding: 14px 16px;
+    background: #fbfcfd;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .budget-table th:nth-child(2), .budget-table th:nth-child(3) { text-align: right; }
+
+  .budget-table td {
+    color: var(--ink);
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  .budget-table tr:last-child td { border-bottom: none; }
+  .budget-table td:nth-child(2), .budget-table td:nth-child(3) { text-align: right; }
+
+  .b-cat { color: var(--navy); font-weight: 900; }
+  .b-detail { color: var(--muted); font-size: 11.5px; line-height: 1.45; margin-top: 4px; }
+
+  .b-tag {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  .b-tag-confirmed { background: var(--done-bg); color: var(--done); }
+  .b-tag-tbd { background: var(--progress-bg); color: var(--progress); }
+
+  .budget-notes {
+    margin-top: 14px;
+    color: var(--muted);
+    background: var(--navy-soft);
+    border: 1px solid var(--navy-soft-2);
+    border-left: 5px solid var(--navy);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 12px;
+    line-height: 1.58;
+  }
+
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .roadmap-card {
+    position: relative;
+    border: 1px solid var(--line);
+    background: var(--white);
+    border-radius: 20px;
+    padding: 18px 16px;
+    min-height: 310px;
+    overflow: hidden;
+  }
+
+  .roadmap-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--navy);
+  }
+
+  .roadmap-card.past::before { background: var(--done); }
+  .roadmap-card.current::before { background: var(--progress); }
+  .roadmap-card.future::before { background: var(--navy); }
+
+  .roadmap-card.current {
+    border-color: rgba(186, 117, 23, 0.32);
+    box-shadow: 0 14px 34px rgba(186, 117, 23, 0.10);
+  }
+
+  .roadmap-month {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .roadmap-month-name {
+    color: var(--ink);
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+
+  .roadmap-tag {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 5px 8px;
+    font-size: 8.5px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tl-tag-past { background: var(--done-bg); color: var(--done); }
+  .tl-tag-current { background: var(--progress-bg); color: var(--progress); }
+  .tl-tag-future { background: var(--navy-soft); color: var(--navy); }
+
+  .roadmap-count {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
+    margin-top: 5px;
+    font-weight: 700;
+  }
+
+  .roadmap-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 15px;
+  }
+
+  .tl-milestone {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 8px;
+    align-items: flex-start;
+    color: var(--ink);
+    font-size: 11.4px;
+    line-height: 1.4;
+  }
+
+  .tl-ws-badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--navy-soft);
+    color: var(--navy);
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .ongoing-block {
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    background: var(--white);
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  .ongoing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .foot-note {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  @media (max-width: 1120px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-status { max-width: none; }
+    .metrics { grid-template-columns: repeat(3, 1fr); }
+    .pillars { grid-template-columns: repeat(2, 1fr); }
+    .obj-layout { grid-template-columns: 1fr; }
+    .workstream-brief { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .budget-top { grid-template-columns: 1fr; }
+    .roadmap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 820px) {
+    .app { width: min(100% - 28px, 1400px); padding-top: 18px; }
+    .hero { padding: 24px; border-radius: 22px; }
+    .hero h1 { letter-spacing: -1.4px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .phase-strip { display: flex; overflow-x: auto; padding-bottom: 4px; }
+    .phase-month { min-width: 136px; }
+    .body { padding: 22px; }
+    .view-head { grid-template-columns: 1fr; }
+    .ws-grid { grid-template-columns: 1fr; }
+    .roadmap { grid-template-columns: 1fr; }
+    .roadmap-card { min-height: auto; }
+    .ongoing-grid { grid-template-columns: 1fr; }
+    .budget-bar-row { grid-template-columns: 1fr; gap: 8px; }
+    .budget-bar-value { text-align: left; }
+  }
+
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: 1fr; }
+    .pillars { grid-template-columns: 1fr; }
+    .pillar { min-height: 144px; }
+    .workstream-brief { grid-template-columns: 1fr; }
+    .item-row { grid-template-columns: 1fr; gap: 8px; }
+    .item-when { text-align: left; }
+  }
+
+
+  .edit-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 14px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid rgba(54, 88, 136, 0.16);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 10px 28px rgba(31, 42, 55, 0.05);
+    backdrop-filter: blur(12px);
+  }
+  .edit-toolbar span { color: var(--muted); font-size: 12px; font-weight: 700; line-height: 1.4; }
+  .edit-toolbar strong { color: var(--navy); }
+  .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .toolbar-btn { color: var(--navy); background: var(--navy-soft); border: 1px solid var(--navy-soft-2); border-radius: 999px; padding: 8px 12px; font-size: 11px; font-weight: 900; cursor: pointer; transition: background 0.16s ease, transform 0.16s ease; }
+  .toolbar-btn:hover { background: var(--navy-soft-2); transform: translateY(-1px); }
+  .editable-text { border-radius: 7px; outline: 1px dashed transparent; outline-offset: 3px; cursor: text; transition: background 0.14s ease, outline-color 0.14s ease, box-shadow 0.14s ease; white-space: pre-wrap; }
+  .editable-text:hover { background: rgba(54, 88, 136, 0.08); outline-color: rgba(54, 88, 136, 0.22); }
+  .editable-text:focus { background: rgba(255, 255, 255, 0.92); outline: 2px solid rgba(54, 88, 136, 0.34); box-shadow: 0 8px 24px rgba(31, 42, 55, 0.10); }
+  .hero .editable-text:focus, .hero .editable-text:hover, .budget-hero .editable-text:focus, .budget-hero .editable-text:hover, .obj-purpose .editable-text:focus, .obj-purpose .editable-text:hover, .pillar.active .editable-text:hover, .pillar.active .editable-text:focus { background: rgba(255, 255, 255, 0.16); outline-color: rgba(255, 255, 255, 0.36); }
+  .sortable-hint { color: var(--muted); font-size: 11px; font-weight: 700; }
+  .item-row { grid-template-columns: 28px 96px minmax(0, 1fr) 86px; cursor: grab; }
+  .item-row:active { cursor: grabbing; }
+  .drag-handle { width: 24px; min-height: 24px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); background: rgba(54, 88, 136, 0.07); font-size: 14px; font-weight: 900; cursor: grab; user-select: none; }
+  .item-row.dragging { opacity: 0.48; box-shadow: 0 18px 42px rgba(31, 42, 55, 0.16); }
+  .item-list.drag-active { outline: 2px dashed rgba(54, 88, 136, 0.22); outline-offset: 8px; border-radius: 18px; }
+  .save-pulse { animation: savePulse 0.5s ease; }
+  @keyframes savePulse { 0% { box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.28); } 100% { box-shadow: 0 0 0 12px rgba(29, 158, 117, 0); } }
+  @media (max-width: 820px) { .edit-toolbar { align-items: flex-start; flex-direction: column; } .toolbar-actions { justify-content: flex-start; } }
+  @media (max-width: 600px) { .item-row { grid-template-columns: 28px 1fr; } .item-row .status-pill, .item-row .item-text, .item-row .item-when { grid-column: 2; } .item-when { text-align: left; } }
+
+  .top-nav { display:flex; align-items:center; justify-content:space-between; gap:14px; margin: 0 0 18px; padding: 10px 12px; border: 1px solid rgba(226,232,240,0.9); border-radius: 18px; background: rgba(255,255,255,0.82); box-shadow: 0 12px 30px rgba(31,42,55,0.05); backdrop-filter: blur(12px); }
+  .top-nav .brand { color: var(--navy); font-weight: 800; font-size: 13px; letter-spacing: 0.2px; white-space: nowrap; }
+  .top-nav .links { display:flex; gap:8px; flex-wrap: wrap; justify-content:flex-end; }
+  .top-nav a { color: var(--muted); text-decoration:none; font-size: 12px; font-weight: 800; padding: 8px 11px; border-radius: 999px; transition: all 0.15s ease; }
+  .top-nav a:hover, .top-nav a.active-page { background: var(--navy); color: #fff; }
+  .sync-status { display:inline-flex; align-items:center; gap:6px; margin-left: 10px; padding: 5px 9px; border-radius: 999px; background: rgba(54,88,136,0.09); color: var(--navy); font-weight: 800; white-space: nowrap; }
+  .sync-status::before { content:''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.85; }
+  .sync-status.saving { color: #ba7517; background: rgba(186,117,23,0.10); }
+  .sync-status.error, .sync-status.warn { color: #b42318; background: rgba(180,35,24,0.10); }
+  .sync-status.synced { color: #1d9e75; background: rgba(29,158,117,0.10); }
+  @media (max-width: 700px) { .top-nav { align-items:flex-start; flex-direction:column; } .top-nav .links { justify-content:flex-start; } .sync-status { display:flex; width: fit-content; margin: 8px 0 0; } }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="top-nav" aria-label="Site navigation">
+    <div class="brand">Digital Marketing Plan</div>
+    <div class="links">
+      <a href="index.html">Overview</a>
+      <a href="phase-1.html" class="active-page">Phase 1: Foundation</a>
+      <a href="phase-2.html">Phase 2: Testing</a>
+    </div>
+  </nav>
+
+  <section class="hero" aria-labelledby="pageTitle">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Digital Marketing Plan</div>
+        <h1 id="pageTitle">Phase 1: Foundation</h1>
+        <p class="hero-copy">An executive working dashboard for building Gulf Cryo’s digital marketing operating system before performance scaling begins.</p>
+        <div class="hero-meta">
+          <span class="meta-chip">April to August 2026</span>
+          <span class="meta-chip">4 strategic pillars</span>
+          <span class="meta-chip">8 foundation workstreams</span>
+        </div>
+      </div>
+      <aside class="hero-status" aria-label="Current phase status">
+        <div>
+          <div class="status-label">Current stage</div>
+          <div class="status-main">May 2026</div>
+          <div class="status-sub">Foundation in progress. The launch dependency remains August.</div>
+        </div>
+        <div class="mini-progress" aria-label="Phase progress">
+          <div class="mini-progress-top"><span>Phase timeline</span><span>2 of 5 months</span></div>
+          <div class="mini-track"><span class="mini-fill"></span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="edit-toolbar" aria-label="Editing tools">
+    <span><strong>Edit mode:</strong> click any text to edit it, then click away to save. Open a workstream and drag KPI rows to rearrange them. <span class="sync-status" id="syncStatus">Local draft</span></span>
+    <div class="toolbar-actions">
+      <button class="toolbar-btn" id="exportState" type="button">Export JSON</button>
+      <button class="toolbar-btn" id="resetEdits" type="button">Reset edits</button>
+    </div>
+  </section>
+
+  <section class="metrics" id="metrics" aria-label="Phase summary metrics"></section>
+
+  <section class="phase-strip-wrap" aria-label="Phase months">
+    <div class="section-label"><span>Timeline strip</span><span>Launch target: August</span></div>
+    <div class="phase-strip" id="phaseStrip"></div>
+  </section>
+
+  <nav class="pillars" id="pillars" aria-label="Dashboard pillars">
+    <div class="pillar" data-pillar="objectives" data-index="01" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 01</div>
+      <div class="pillar-name">Objectives</div>
+      <div class="pillar-desc">Why this phase exists and what it stands for.</div>
+    </div>
+    <div class="pillar" data-pillar="deliverables" data-index="02" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 02</div>
+      <div class="pillar-name">Deliverables</div>
+      <div class="pillar-desc">Eight workstreams that build the digital foundation.</div>
+    </div>
+    <div class="pillar" data-pillar="budget" data-index="03" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 03</div>
+      <div class="pillar-name">Budget</div>
+      <div class="pillar-desc">Known spend, pending inputs, and infrastructure weighting.</div>
+    </div>
+    <div class="pillar" data-pillar="timeframe" data-index="04" role="button" tabindex="0">
+      <div class="pillar-letter">Pillar 04</div>
+      <div class="pillar-name">Timeframe</div>
+      <div class="pillar-desc">Month-by-month roadmap through launch.</div>
+    </div>
+  </nav>
+
+  <main class="body-shell" aria-live="polite">
+    <div class="body" id="body"></div>
+  </main>
+
+  <div class="foot-note">Working view for discussion. Statuses reflect progress as of May 2026.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script>
+
+  const PAGE_ID = 'phase-1';
+  const STORAGE_KEY = 'phase1-foundation-executive-dashboard-editable-v1';
+  const MONTHS = ['April', 'May', 'June', 'July', 'August'];
+  const CURRENT = 'May';
+  const curIdx = MONTHS.indexOf(CURRENT);
+
+  const DEFAULT_WORKSTREAMS = [
+    {
+      num: 1, id: 'cla', title: 'Conversion-Led Web Architecture',
+      sub: 'The strategic shift: brochure to business-generating tool',
+      desc: 'Turn the website from a corporate brochure into a conversion-led commercial tool. Architecture, message, and user journey rebuilt around capturing and converting demand.',
+      items: [
+        { text: 'Website audit completed', status: 'done', pill: 'DONE', when: 'April' },
+        { text: 'Decision locked: rebuild on React, same domain, new technology', status: 'done', pill: 'DONE', when: 'April' },
+        { text: 'Conversion-led architecture and site structure defined', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Core message reframed around services and commercial delivery', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'User journeys mapped, conversion paths defined', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Commercial priorities reflected in the site structure', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+      ]
+    },
+    {
+      num: 2, id: 'perf', title: 'Website Performance',
+      sub: 'Technical health checks plus a three-tier user testing protocol',
+      desc: 'The new React build must clear every technical health check, then pass a three-tier user testing protocol before launch: internal acceptance, customer validation, and naive-user comprehension.',
+      items: [
+        { text: 'Temporary security and SEO fixes applied to current site', status: 'done', pill: 'DONE', when: 'April' },
+        { text: 'New React site built and populated', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Internal user acceptance testing (UAT)', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Customer validation testing (sample group from customer side)', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Naive-user comprehension testing (outsider, no industry context)', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Lighthouse performance and speed test passing', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'All pages indexed in Google Search Console', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'All forms functioning, submissions routed correctly', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Mobile responsiveness verified across devices', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Security audit passing, zero critical issues', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+      ]
+    },
+    {
+      num: 3, id: 'content', title: 'Website Content',
+      sub: 'Section-by-section copywriting led by a dedicated copywriter',
+      desc: 'Final copy for every section of the new site. A dedicated copywriter is assigned, briefed against the Tactical Campaigns framework, and produces conversion-focused copy aligned to priority segments and markets.',
+      items: [
+        { text: 'Copywriter sourced and assigned', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Content brief written against Tactical Campaigns framework', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Section copy drafted: home, sectors, solutions, products, about, contact', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Case studies written for priority segments', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Stakeholder review and approval cycle', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Final copy populated in the new site', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+      ]
+    },
+    {
+      num: 4, id: 'seo', title: 'SEO Infrastructure',
+      sub: 'SEMrush-led market analysis, keyword strategy, and technical SEO foundation',
+      desc: 'Promoted out of Website Performance into its own track. SEMrush subscription, full market and competitor analysis for UAE and KSA, keyword strategy mapped to priority segments, and the technical SEO architecture built into the new site from day one.',
+      items: [
+        { text: 'SEMrush subscription activated (Advanced plan)', status: 'scheduled', pill: 'BY MAY', when: 'May' },
+        { text: 'Market and competitor analysis for UAE and KSA', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Keyword research per priority segment', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Keyword-to-content mapping for site and blog', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'On-page SEO architecture defined for new site', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Technical SEO complete: schema, sitemap, structured data, indexation', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+      ]
+    },
+    {
+      num: 5, id: 'social', title: 'Social Media',
+      sub: 'Brand discipline on the channels: unified image, pillars, cadence',
+      desc: 'Unify Gulf Cryo\'s social presence so every post looks and sounds like one company. Consistent identity, full pillar coverage, business priorities reflected in the plan, stable cadence executed in-house.',
+      items: [
+        { text: 'Social media audit completed', status: 'done', pill: 'DONE', when: 'April' },
+        { text: 'Agency dropped, publishing moved fully in-house', status: 'done', pill: 'DONE', when: 'April' },
+        { text: 'Unified brand image and consistent look and feel across channels', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Business priorities reflected in the content plan', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'All content pillars represented in the publishing mix', status: 'ongoing', pill: 'THROUGH AUG', when: 'Ongoing' },
+        { text: 'Stable cadence held, minimum twice per week', status: 'ongoing', pill: 'THROUGH AUG', when: 'Ongoing' },
+      ]
+    },
+    {
+      num: 6, id: 'engine', title: 'Content Engine',
+      sub: 'The wider production capability: blog, video, long-form',
+      desc: 'The production engine that feeds every channel beyond social. Blog developed as an industry-grade editorial asset, video production capability established, in-house production proven sustainable.',
+      items: [
+        { text: 'Content strategy, plan and calendar approved', status: 'done', pill: 'DONE', when: 'April' },
+        { text: 'April to August content calendar in execution', status: 'progress', pill: 'IN PROGRESS', when: 'May' },
+        { text: 'Website blog structure and editorial approach defined', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Video content production capability established', status: 'scheduled', pill: 'BY AUGUST', when: 'August' },
+        { text: 'In-house production proven sustainable without an agency', status: 'scheduled', pill: 'BY AUGUST', when: 'August' },
+      ]
+    },
+    {
+      num: 7, id: 'crm', title: 'CRM and Marketing Operations',
+      sub: 'CRM integration, customer portal, measurement, and the data flow that makes opportunity routing work',
+      desc: 'The operational platform layer. Marketing-owned scope of the Dynamics rollout: website-to-CRM integration, marketing dashboard, customer portal access via the website, plus the measurement infrastructure (GA4, GTM, conversion tracking) without which Phase 2 starts blind.',
+      items: [
+        { text: 'Website-to-CRM integration scoped with IT', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Marketing dashboard configuration defined in Dynamics', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Customer portal access architecture defined', status: 'scheduled', pill: 'BY JULY', when: 'July' },
+        { text: 'Form data routing and opportunity-to-commercial flow tested', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Customer portal accessible via the website', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'GA4 configured with all website traffic sources', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Google Tag Manager live for website conversions', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Conversion tracking working for website and social media', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Pre-launch baseline metrics captured', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+      ]
+    },
+    {
+      num: 8, id: 'outcomes', title: 'Phase 1 Outcomes',
+      sub: 'What we walk into Phase 2 with',
+      desc: 'The exit deliverable. What Phase 2 inherits from Phase 1: a fully functioning conversion-led website with operational measurement, an SEO foundation, a content base, a stabilized social engine, a marketing-aligned CRM, the Tactical Campaigns framework locked, and a costed Phase 2 plan ready to execute.',
+      items: [
+        { text: 'Tactical Campaigns framework presented and discussed', status: 'progress', pill: 'IN PROGRESS', when: 'May' },
+        { text: 'Tactical Campaigns framework locked and signed off', status: 'scheduled', pill: 'BY JUNE', when: 'June' },
+        { text: 'Fully functioning conversion-led website live', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Operational measurement infrastructure (GA4, GTM, conversion tracking)', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'SEO foundation in place: keywords, on-page, technical', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Website content base populated and approved', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'CRM-marketing integration operational', status: 'scheduled', pill: 'BY LAUNCH', when: 'August' },
+        { text: 'Phase 2 calibration plan defined and costed', status: 'scheduled', pill: 'BY AUGUST', when: 'August' },
+      ]
+    }
+  ];
+
+  const DEFAULT_BUDGET_LINES = [
+    { cat: 'SEO platform subscription', detail: 'SEMrush — annual. Pro plan 14,000 AED, Advanced plan 20,000 AED.', range: '14,000 – 20,000', tag: 'Confirmed', tagCls: 'b-tag-confirmed', bar: 26 },
+    { cat: 'Website rebuild', detail: 'One-time agency build, React, same domain.', range: '35,000 – 40,000', tag: 'Confirmed', tagCls: 'b-tag-confirmed', bar: 100 },
+    { cat: 'Video content production', detail: '5,000 – 7,000 AED monthly, April through August (5 months).', range: '25,000 – 35,000', tag: 'Confirmed', tagCls: 'b-tag-confirmed', bar: 77 },
+    { cat: 'Website copywriting', detail: 'Dedicated copywriter for full site copy plus case studies. Quote pending.', range: 'TBD', tag: 'Pending', tagCls: 'b-tag-tbd', bar: 18 },
+  ];
+
+  const clone = obj => JSON.parse(JSON.stringify(obj));
+  let savedState = {};
+  try { savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch (error) { savedState = {}; }
+  let workstreams = Array.isArray(savedState.workstreams) ? savedState.workstreams : clone(DEFAULT_WORKSTREAMS);
+  let budgetLines = Array.isArray(savedState.budgetLines) ? savedState.budgetLines : clone(DEFAULT_BUDGET_LINES);
+  let textOverrides = savedState.textOverrides || {};
+  let activePillar = savedState.activePillar || 'objectives';
+
+  const body = document.getElementById('body');
+  const phaseStrip = document.getElementById('phaseStrip');
+  const metrics = document.getElementById('metrics');
+
+
+  const SYNC_CONFIG = window.DASHBOARD_SYNC || {};
+  const SUPABASE_TABLE = 'dashboard_pages';
+  const supabaseClient = (window.supabase && SYNC_CONFIG.SUPABASE_URL && SYNC_CONFIG.SUPABASE_ANON_KEY && !String(SYNC_CONFIG.SUPABASE_URL).includes('YOUR-PROJECT'))
+    ? window.supabase.createClient(SYNC_CONFIG.SUPABASE_URL, SYNC_CONFIG.SUPABASE_ANON_KEY)
+    : null;
+  let syncReady = false;
+  let suppressRemoteSave = false;
+  let remoteSaveTimer = null;
+
+  function cloneForSync(value) { return JSON.parse(JSON.stringify(value)); }
+  function getDashboardState() {
+    const state = { workstreams, budgetLines, textOverrides, activePillar, savedAt: new Date().toISOString() };
+    if (typeof waves !== 'undefined') state.waves = waves;
+    return state;
+  }
+  function setSyncStatus(message, mode = '') {
+    const el = document.getElementById('syncStatus');
+    if (!el) return;
+    el.textContent = message;
+    el.className = 'sync-status' + (mode ? ' ' + mode : '');
+  }
+  function saveLocalState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getDashboardState())); }
+  function saveState() {
+    saveLocalState();
+    if (!suppressRemoteSave) scheduleRemoteSave();
+  }
+  function scheduleRemoteSave() {
+    if (!supabaseClient) { setSyncStatus('Local only: add Supabase config', 'warn'); return; }
+    if (!syncReady) { setSyncStatus('Connecting sync…', 'saving'); return; }
+    clearTimeout(remoteSaveTimer);
+    setSyncStatus('Saving…', 'saving');
+    remoteSaveTimer = setTimeout(() => pushRemoteState(), 450);
+  }
+  async function pushRemoteState() {
+    if (!supabaseClient) return;
+    const payload = { id: PAGE_ID, content: getDashboardState(), updated_at: new Date().toISOString() };
+    const { error } = await supabaseClient.from(SUPABASE_TABLE).upsert(payload, { onConflict: 'id' });
+    if (error) { console.error(error); setSyncStatus('Sync error', 'error'); return; }
+    setSyncStatus('Synced', 'synced');
+  }
+  function applyDashboardState(state) {
+    if (!state || typeof state !== 'object') return;
+    if (Array.isArray(state.workstreams)) workstreams = cloneForSync(state.workstreams);
+    if (Array.isArray(state.budgetLines)) budgetLines = cloneForSync(state.budgetLines);
+    if (typeof DEFAULT_WAVES !== 'undefined' && typeof waves !== 'undefined' && Array.isArray(state.waves)) waves = cloneForSync(state.waves);
+    textOverrides = state.textOverrides && typeof state.textOverrides === 'object' ? cloneForSync(state.textOverrides) : {};
+    activePillar = state.activePillar || activePillar || 'objectives';
+    saveLocalState();
+    renderMetrics();
+    renderPhaseStrip();
+    setPillar(activePillar);
+    initStaticEditables();
+    setSyncStatus('Synced live', 'synced');
+  }
+  async function initRemoteSync() {
+    if (!supabaseClient) { setSyncStatus('Local only: add Supabase config', 'warn'); return; }
+    setSyncStatus('Connecting sync…', 'saving');
+    const { data, error } = await supabaseClient.from(SUPABASE_TABLE).select('content').eq('id', PAGE_ID).maybeSingle();
+    if (error) { console.error(error); setSyncStatus('Sync setup error', 'error'); return; }
+    syncReady = true;
+    if (data && data.content) {
+      suppressRemoteSave = true;
+      applyDashboardState(data.content);
+      suppressRemoteSave = false;
+    } else {
+      await pushRemoteState();
+    }
+    supabaseClient
+      .channel('dashboard-sync-' + PAGE_ID)
+      .on('postgres_changes', { event: '*', schema: 'public', table: SUPABASE_TABLE, filter: 'id=eq.' + PAGE_ID }, payload => {
+        if (!payload.new || !payload.new.content) return;
+        suppressRemoteSave = true;
+        applyDashboardState(payload.new.content);
+        suppressRemoteSave = false;
+      })
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') setSyncStatus('Live sync on', 'synced');
+      });
+  }
+  async function resetDashboardEverywhere() {
+    if (!confirm('Reset all text edits and KPI ordering for everyone viewing this dashboard?')) return;
+    workstreams = cloneForSync(DEFAULT_WORKSTREAMS);
+    if (typeof DEFAULT_BUDGET_LINES !== 'undefined') budgetLines = cloneForSync(DEFAULT_BUDGET_LINES);
+    if (typeof DEFAULT_BUDGET !== 'undefined') budgetLines = cloneForSync(DEFAULT_BUDGET);
+    if (typeof DEFAULT_WAVES !== 'undefined' && typeof waves !== 'undefined') waves = cloneForSync(DEFAULT_WAVES);
+    textOverrides = {};
+    activePillar = 'objectives';
+    localStorage.removeItem(STORAGE_KEY);
+    saveLocalState();
+    if (supabaseClient && syncReady) await pushRemoteState();
+    window.location.reload();
+  }
+
+  function escapeHTML(value) { return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;'); }
+  function escapeAttr(value) { return escapeHTML(value).replaceAll('`', '&#096;'); }
+  function getTextValue(el) { return el.innerText.replace(/\u00A0/g, ' ').trim(); }
+  function editableStatic(key, value, tag = 'span', className = '', attrs = '') { const actual = Object.prototype.hasOwnProperty.call(textOverrides, key) ? textOverrides[key] : value; return `<${tag} class="${className} editable-text" contenteditable="plaintext-only" spellcheck="false" data-edit-key="${escapeAttr(key)}" ${attrs}>${escapeHTML(actual)}</${tag}>`; }
+  function editableBound({ value, tag = 'span', className = '', bindType, attrs = '', wsId = '', itemIndex = '', budgetIndex = '', field = '' }) { return `<${tag} class="${className} editable-text" contenteditable="plaintext-only" spellcheck="false" data-bind-type="${escapeAttr(bindType)}" data-ws-id="${escapeAttr(wsId)}" data-item-index="${escapeAttr(itemIndex)}" data-budget-index="${escapeAttr(budgetIndex)}" data-field="${escapeAttr(field)}" ${attrs}>${escapeHTML(value)}</${tag}>`; }
+  function getAllItems() { return workstreams.flatMap(w => w.items); }
+  function countStatus(status) { return getAllItems().filter(i => i.status === status).length; }
+  function findWorkstream(id) { return workstreams.find(w => w.id === id); }
+  function pulseSaved(el) { el.classList.remove('save-pulse'); void el.offsetWidth; el.classList.add('save-pulse'); }
+  function updateBoundValue(el, value) { const type = el.dataset.bindType; const field = el.dataset.field; if (type === 'workstream') { const ws = findWorkstream(el.dataset.wsId); if (ws && field in ws) ws[field] = value; } if (type === 'item') { const ws = findWorkstream(el.dataset.wsId); const idx = Number(el.dataset.itemIndex); if (ws && ws.items[idx] && field in ws.items[idx]) ws.items[idx][field] = value; } if (type === 'budget') { const idx = Number(el.dataset.budgetIndex); if (budgetLines[idx] && field in budgetLines[idx]) budgetLines[idx][field] = value; } }
+  function applyStaticEditable(selector, key) { const el = document.querySelector(selector); if (!el) return; el.classList.add('editable-text'); el.setAttribute('contenteditable', 'plaintext-only'); el.setAttribute('spellcheck', 'false'); el.dataset.editKey = key; if (Object.prototype.hasOwnProperty.call(textOverrides, key)) { el.textContent = textOverrides[key]; } else { textOverrides[key] = el.textContent.trim(); } }
+  function initStaticEditables() {
+    const staticItems = [
+      ['.hero .eyebrow', 'hero.eyebrow'], ['#pageTitle', 'hero.title'], ['.hero-copy', 'hero.copy'],
+      ['.hero-meta .meta-chip:nth-child(1)', 'hero.meta.1'], ['.hero-meta .meta-chip:nth-child(2)', 'hero.meta.2'], ['.hero-meta .meta-chip:nth-child(3)', 'hero.meta.3'],
+      ['.hero-status .status-label', 'hero.status.label'], ['.hero-status .status-main', 'hero.status.main'], ['.hero-status .status-sub', 'hero.status.sub'],
+      ['.mini-progress-top span:nth-child(1)', 'hero.timeline.label'], ['.mini-progress-top span:nth-child(2)', 'hero.timeline.count'],
+      ['.section-label span:nth-child(1)', 'timeline.strip.label'], ['.section-label span:nth-child(2)', 'timeline.strip.launch'], ['.foot-note', 'footer.note'],
+      ['[data-pillar="objectives"] .pillar-letter', 'pillar.objectives.letter'], ['[data-pillar="objectives"] .pillar-name', 'pillar.objectives.name'], ['[data-pillar="objectives"] .pillar-desc', 'pillar.objectives.desc'],
+      ['[data-pillar="deliverables"] .pillar-letter', 'pillar.deliverables.letter'], ['[data-pillar="deliverables"] .pillar-name', 'pillar.deliverables.name'], ['[data-pillar="deliverables"] .pillar-desc', 'pillar.deliverables.desc'],
+      ['[data-pillar="budget"] .pillar-letter', 'pillar.budget.letter'], ['[data-pillar="budget"] .pillar-name', 'pillar.budget.name'], ['[data-pillar="budget"] .pillar-desc', 'pillar.budget.desc'],
+      ['[data-pillar="timeframe"] .pillar-letter', 'pillar.timeframe.letter'], ['[data-pillar="timeframe"] .pillar-name', 'pillar.timeframe.name'], ['[data-pillar="timeframe"] .pillar-desc', 'pillar.timeframe.desc']
+    ];
+    staticItems.forEach(([selector, key]) => applyStaticEditable(selector, key)); saveState();
+  }
+
+  function renderMetrics() {
+    const all = getAllItems();
+    const cards = [ { num: workstreams.length, label: 'Workstreams', key: 'metric.workstreams' }, { num: all.length, label: 'Total KPI items', key: 'metric.kpis' }, { num: countStatus('done'), label: 'Completed', key: 'metric.completed' }, { num: countStatus('progress'), label: 'In progress', key: 'metric.progress' }, { num: 'August', label: 'Launch month', key: 'metric.launch' } ];
+    metrics.innerHTML = cards.map(card => `<div class="metric-card">${editableStatic(card.key + '.num', card.num, 'strong')}${editableStatic(card.key + '.label', card.label, 'span')}</div>`).join('');
+  }
+  function renderPhaseStrip() {
+    phaseStrip.innerHTML = '';
+    MONTHS.forEach((m, idx) => { let cls = 'future'; let marker = 'Upcoming'; if (idx < curIdx) { cls = 'past'; marker = 'Completed'; } else if (idx === curIdx) { cls = 'current'; marker = 'We are here'; } if (m === 'August') marker = 'Website launch'; const div = document.createElement('div'); div.className = 'phase-month ' + cls; div.innerHTML = `${editableStatic('phase.month.' + m + '.name', m, 'div', 'phase-name')}${editableStatic('phase.month.' + m + '.marker', marker, 'span', 'marker')}`; phaseStrip.appendChild(div); });
+  }
+  function animateBody() { body.style.animation = 'none'; body.offsetHeight; body.style.animation = ''; }
+  function getNextMilestone(ws) { return ws.items.find(i => i.status !== 'done') || ws.items[ws.items.length - 1]; }
+  function getNextMilestoneIndex(ws) { const idx = ws.items.findIndex(i => i.status !== 'done'); return idx >= 0 ? idx : Math.max(0, ws.items.length - 1); }
+
+  function viewObjectives() {
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('objectives.title', 'Why Phase 1 exists', 'div', 'view-title')}${editableStatic('objectives.sub', 'The principles that govern every decision in the foundation phase.', 'div', 'view-sub')}</div>${editableStatic('objectives.tag', 'Foundation first', 'div', 'view-tag')}</div><div class="obj-layout"><section class="obj-purpose">${editableStatic('objectives.purpose.label', 'Operating principle', 'div', 'obj-purpose-label')}${editableStatic('objectives.purpose.title', 'Build the machine before measuring performance.', 'h3')}${editableStatic('objectives.purpose.copy', 'Phase 1 is not about results. It is about making digital marketing operational at Gulf Cryo. Every workstream below ends in a KPI we control or can verifiably complete. No lead, opportunity, or pipeline numbers are promised in this phase. Those belong to Phase 2. The job here is to build the machine, instrument it, and hand Phase 2 a foundation that can be tested honestly.', 'p')}</section><div class="obj-principles"><div class="principle">${editableStatic('objectives.principle.1.label', 'Principle 01', 'div', 'principle-label')}${editableStatic('objectives.principle.1.title', 'Opportunities, not leads', 'div', 'principle-title')}${editableStatic('objectives.principle.1.copy', 'Digital marketing exists to generate qualified commercial opportunities, not contact volume. Phase 1 builds the surface that captures them. Phase 2 calibrates what they cost. Phase 3 scales.', 'div', 'principle-text')}</div><div class="principle">${editableStatic('objectives.principle.2.label', 'Principle 02', 'div', 'principle-label')}${editableStatic('objectives.principle.2.title', 'Foundation before performance', 'div', 'principle-title')}${editableStatic('objectives.principle.2.copy', 'A conversion-led website, working measurement, a content base, and a marketing-integrated CRM are not optional. Without them, Phase 2 testing produces noise.', 'div', 'principle-text')}</div><div class="principle tactical">${editableStatic('objectives.principle.3.label', 'Principle 03 · Key artifact', 'div', 'principle-label')}${editableStatic('objectives.principle.3.title', 'Tactical Campaigns framework', 'div', 'principle-title')}${editableStatic('objectives.principle.3.copy', 'The locked direction for 2026 campaigns: priority countries, segments, products, messaging tracks, and how success is measured downstream.', 'div', 'principle-text')}</div><div class="principle">${editableStatic('objectives.principle.4.label', 'Principle 04', 'div', 'principle-label')}${editableStatic('objectives.principle.4.title', 'No commercial number is promised yet', 'div', 'principle-title')}${editableStatic('objectives.principle.4.copy', '2026 is a baseline year. Phase 2 produces the verified numbers that make future commitments credible. Phase 1 protects leadership trust.', 'div', 'principle-text')}</div></div></div>`; animateBody();
+  }
+
+  function viewDeliverables() {
+    const allItems = getAllItems(); const done = countStatus('done'); const prog = countStatus('progress'); const ongoing = countStatus('ongoing'); const scheduled = countStatus('scheduled');
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('deliverables.title', 'Eight workstreams that build the foundation', 'div', 'view-title')}${editableStatic('deliverables.sub', `Click any workstream to see the detailed KPIs and status. ${done} done · ${prog} in progress · ${ongoing} ongoing · ${scheduled} scheduled.`, 'div', 'view-sub')}</div>${editableStatic('deliverables.tag', `${allItems.length} KPI items`, 'div', 'view-tag')}</div><div class="ws-grid" id="wsGrid"></div>`;
+    const grid = document.getElementById('wsGrid');
+    workstreams.forEach(ws => { const doneCount = ws.items.filter(it => it.status === 'done').length; const progressPercent = Math.round((doneCount / ws.items.length) * 100); const nextIndex = getNextMilestoneIndex(ws); const next = ws.items[nextIndex]; const card = document.createElement('div'); card.className = 'ws-card'; card.setAttribute('role', 'button'); card.setAttribute('tabindex', '0'); card.innerHTML = `<div class="ws-num">${String(ws.num).padStart(2, '0')}</div><div><div class="ws-title-row">${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'ws-title' })}${editableStatic('workstream.' + ws.id + '.progressLabel', `${doneCount}/${ws.items.length}`, 'div', 'ws-prog')}</div>${editableBound({ value: ws.sub, bindType: 'workstream', wsId: ws.id, field: 'sub', tag: 'div', className: 'ws-sub' })}<div class="ws-progress-bar" aria-hidden="true"><span style="width:${progressPercent}%"></span></div><div class="next-milestone"><strong>Next:</strong> ${editableBound({ value: next.text, bindType: 'item', wsId: ws.id, itemIndex: nextIndex, field: 'text' })}</div></div>`; card.addEventListener('click', event => { if (event.target.closest('.editable-text')) return; viewWorkstream(ws.id); }); card.addEventListener('keydown', event => { if (event.target.closest('.editable-text')) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); viewWorkstream(ws.id); } }); grid.appendChild(card); }); animateBody();
+  }
+
+  function viewWorkstream(id) {
+    const ws = findWorkstream(id); if (!ws) return; const doneCount = ws.items.filter(it => it.status === 'done').length; const progressCount = ws.items.filter(it => it.status === 'progress').length; const scheduledCount = ws.items.filter(it => it.status === 'scheduled').length; const nextIndex = getNextMilestoneIndex(ws); const next = ws.items[nextIndex];
+    body.innerHTML = `<div class="view-head"><div>${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'view-title' })}<div class="view-sub">${editableStatic('workstream.detail.prefix.' + ws.id, `Workstream ${ws.num} of 8 ·`, 'span')} ${editableBound({ value: ws.desc, bindType: 'workstream', wsId: ws.id, field: 'desc' })}</div></div>${editableStatic('workstream.detail.tag.' + ws.id, `${doneCount}/${ws.items.length} complete`, 'div', 'view-tag')}</div><div class="workstream-brief"><div class="brief-card primary">${editableStatic('workstream.detail.nextLabel.' + ws.id, 'Next milestone', 'div', 'brief-label')}${editableBound({ value: next.text, bindType: 'item', wsId: ws.id, itemIndex: nextIndex, field: 'text', tag: 'div', className: 'brief-value' })}</div><div class="brief-card">${editableStatic('workstream.detail.doneLabel.' + ws.id, 'Done', 'div', 'brief-label')}${editableStatic('workstream.detail.doneValue.' + ws.id, doneCount, 'div', 'brief-value')}</div><div class="brief-card">${editableStatic('workstream.detail.progressLabel.' + ws.id, 'In progress', 'div', 'brief-label')}${editableStatic('workstream.detail.progressValue.' + ws.id, progressCount, 'div', 'brief-value')}</div><div class="brief-card">${editableStatic('workstream.detail.scheduledLabel.' + ws.id, 'Scheduled', 'div', 'brief-label')}${editableStatic('workstream.detail.scheduledValue.' + ws.id, scheduledCount, 'div', 'brief-value')}</div></div><div class="items-head">${editableStatic('workstream.detail.kpiLabel.' + ws.id, 'KPIs and status', 'span', 'ih-label')}${editableStatic('workstream.detail.sortHint.' + ws.id, 'Drag rows to rearrange. Click text to edit.', 'span', 'sortable-hint')}</div><div class="item-list" id="wsItems"></div><button class="back-btn" id="wsBack" type="button">← ${editableStatic('workstream.detail.backLabel.' + ws.id, 'Back to workstreams')}</button>`;
+    const itemsEl = document.getElementById('wsItems');
+    ws.items.forEach((it, index) => { const row = document.createElement('div'); row.className = `item-row is-${it.status}`; row.setAttribute('draggable', 'true'); row.dataset.index = String(index); row.innerHTML = `<span class="drag-handle" aria-hidden="true">⋮⋮</span>${editableBound({ value: it.pill, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'pill', tag: 'span', className: `status-pill sp-${it.status}` })}${editableBound({ value: it.text, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'text', tag: 'span', className: 'item-text' })}${editableBound({ value: it.when, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'when', tag: 'span', className: 'item-when' })}`; itemsEl.appendChild(row); });
+    enableKPIDragDrop(ws, itemsEl); document.getElementById('wsBack').addEventListener('click', viewDeliverables); animateBody();
+  }
+  function enableKPIDragDrop(ws, listEl) { listEl.addEventListener('dragstart', event => { if (event.target.closest('.editable-text')) { event.preventDefault(); return; } const row = event.target.closest('.item-row'); if (!row) return; row.classList.add('dragging'); listEl.classList.add('drag-active'); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', row.dataset.index); }); listEl.addEventListener('dragover', event => { event.preventDefault(); const dragging = listEl.querySelector('.dragging'); if (!dragging) return; const afterElement = getDragAfterElement(listEl, event.clientY); if (afterElement == null) listEl.appendChild(dragging); else listEl.insertBefore(dragging, afterElement); }); listEl.addEventListener('drop', event => { event.preventDefault(); const rows = Array.from(listEl.querySelectorAll('.item-row')); const reordered = rows.map(row => ws.items[Number(row.dataset.index)]).filter(Boolean); if (reordered.length === ws.items.length) { ws.items = reordered; saveState(); viewWorkstream(ws.id); } }); listEl.addEventListener('dragend', () => { listEl.classList.remove('drag-active'); listEl.querySelectorAll('.dragging').forEach(row => row.classList.remove('dragging')); }); }
+  function getDragAfterElement(container, y) { const draggableElements = [...container.querySelectorAll('.item-row:not(.dragging)')]; return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2; if (offset < 0 && offset > closest.offset) return { offset, element: child }; return closest; }, { offset: Number.NEGATIVE_INFINITY }).element; }
+
+  function viewBudget() {
+    body.innerHTML = `<div class="view-head"><div>${editableStatic('budget.title', 'Phase 1 budget', 'div', 'view-title')}${editableStatic('budget.sub', 'Working figures in AED. Confirmed infrastructure spend is separated from the remaining copywriting quote.', 'div', 'view-sub')}</div>${editableStatic('budget.tag', '3 confirmed lines', 'div', 'view-tag')}</div><div class="budget-top"><section class="budget-hero">${editableStatic('budget.hero.label', 'Known Phase 1 budget', 'div', 'budget-hero-label')}${editableStatic('budget.hero.num', '74,000 – 95,000', 'div', 'budget-hero-num')}${editableStatic('budget.hero.unit', 'AED + copywriting pending quote', 'div', 'budget-hero-unit')}${editableStatic('budget.hero.note', 'The spend is heavily weighted toward one-time infrastructure that does not repeat in Phase 2. Most of this builds the platform the business can use for years.', 'div', 'budget-hero-note')}</section><aside class="budget-side"><div class="budget-stat">${editableStatic('budget.stat.1.label', 'Confirmed lines', 'div', 'budget-stat-label')}${editableStatic('budget.stat.1.value', '3 of 4', 'div', 'budget-stat-num')}</div><div class="budget-stat">${editableStatic('budget.stat.2.label', 'One-time vs recurring', 'div', 'budget-stat-label')}${editableStatic('budget.stat.2.value', '2 vs 2', 'div', 'budget-stat-num')}</div><div class="budget-stat">${editableStatic('budget.stat.3.label', 'Pending input', 'div', 'budget-stat-label')}${editableStatic('budget.stat.3.value', 'Copywriter quote', 'div', 'budget-stat-num')}</div></aside></div><div class="budget-breakdown" id="budgetBars"></div><div class="budget-table-wrap"><table class="budget-table"><thead><tr><th>${editableStatic('budget.table.category', 'Category')}</th><th>${editableStatic('budget.table.range', 'Range (AED)')}</th><th>${editableStatic('budget.table.status', 'Status')}</th></tr></thead><tbody id="budgetRows"></tbody></table></div>${editableStatic('budget.notes', 'SEMrush is a recurring annual subscription that carries into Phase 2 and beyond. Video production is the only recurring monthly line during Phase 1. The website rebuild is a one-time infrastructure investment. The copywriter line is pending a quote and will be finalized once a candidate is engaged. Internal labor is not included as it sits under existing salary.', 'div', 'budget-notes')}`;
+    const bars = document.getElementById('budgetBars'); budgetLines.forEach((b, index) => { const row = document.createElement('div'); row.className = 'budget-bar-row'; row.innerHTML = `${editableBound({ value: b.cat, bindType: 'budget', budgetIndex: index, field: 'cat', tag: 'div', className: 'budget-bar-label' })}<div class="budget-bar-track"><span style="width:${b.bar}%"></span></div>${editableBound({ value: b.range, bindType: 'budget', budgetIndex: index, field: 'range', tag: 'div', className: 'budget-bar-value' })}`; bars.appendChild(row); });
+    const rows = document.getElementById('budgetRows'); budgetLines.forEach((b, index) => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${editableBound({ value: b.cat, bindType: 'budget', budgetIndex: index, field: 'cat', tag: 'div', className: 'b-cat' })}${editableBound({ value: b.detail, bindType: 'budget', budgetIndex: index, field: 'detail', tag: 'div', className: 'b-detail' })}</td><td>${editableBound({ value: b.range, bindType: 'budget', budgetIndex: index, field: 'range', tag: 'strong' })}</td><td>${editableBound({ value: b.tag, bindType: 'budget', budgetIndex: index, field: 'tag', tag: 'span', className: `b-tag ${b.tagCls}` })}</td>`; rows.appendChild(tr); }); animateBody();
+  }
+
+  function viewTimeframe() {
+    const buckets = { April: [], May: [], June: [], July: [], August: [], Ongoing: [] }; workstreams.forEach(ws => { ws.items.forEach(it => { if (buckets[it.when]) buckets[it.when].push({ num: ws.num, text: it.text }); }); });
+    let html = `<div class="view-head"><div>${editableStatic('timeframe.title', 'Month-by-month roadmap', 'div', 'view-title')}${editableStatic('timeframe.sub', 'Every workstream item placed in the month it belongs to. The workstream number appears on the left of each milestone.', 'div', 'view-sub')}</div>${editableStatic('timeframe.tag', 'August launch', 'div', 'view-tag')}</div><div class="roadmap">`;
+    MONTHS.forEach((m, idx) => { let cls = 'future', tag = 'Upcoming', tagCls = 'tl-tag-future'; if (idx < curIdx) { cls = 'past'; tag = 'Done'; tagCls = 'tl-tag-past'; } else if (idx === curIdx) { cls = 'current'; tag = 'Now'; tagCls = 'tl-tag-current'; } if (m === 'August') { tag = 'Launch'; tagCls = 'tl-tag-future'; } html += `<section class="roadmap-card ${cls}"><div class="roadmap-month"><div>${editableStatic('timeframe.month.' + m + '.name', m, 'div', 'roadmap-month-name')}${editableStatic('timeframe.month.' + m + '.count', `${buckets[m].length} milestone${buckets[m].length === 1 ? '' : 's'}`, 'div', 'roadmap-count')}</div>${editableStatic('timeframe.month.' + m + '.tag', tag, 'span', `roadmap-tag ${tagCls}`)}</div><div class="roadmap-list">`; if (buckets[m].length) { buckets[m].forEach((ms, msIndex) => { html += `<div class="tl-milestone"><span class="tl-ws-badge">${ms.num}</span>${editableStatic('timeframe.month.' + m + '.milestone.' + msIndex, ms.text, 'span')}</div>`; }); } else { html += `<div class="tl-milestone"><span class="tl-ws-badge">–</span>${editableStatic('timeframe.month.' + m + '.empty', 'No fixed milestones', 'span', '', 'style="color:var(--muted);font-style:italic;"')}</div>`; } html += `</div></section>`; }); html += `</div>`;
+    if (buckets.Ongoing.length) { html += `<section class="ongoing-block"><div class="roadmap-month"><div>${editableStatic('timeframe.ongoing.name', 'Ongoing', 'div', 'roadmap-month-name')}${editableStatic('timeframe.ongoing.count', 'Runs across the phase', 'div', 'roadmap-count')}</div>${editableStatic('timeframe.ongoing.tag', 'Continuous', 'span', 'roadmap-tag', 'style="background:var(--ongoing-bg);color:var(--ongoing);"')}</div><div class="ongoing-grid">`; buckets.Ongoing.forEach((ms, msIndex) => { html += `<div class="tl-milestone"><span class="tl-ws-badge">${ms.num}</span>${editableStatic('timeframe.ongoing.milestone.' + msIndex, ms.text, 'span')}</div>`; }); html += `</div></section>`; }
+    body.innerHTML = html; animateBody();
+  }
+
+  function setPillar(name) { activePillar = name; saveState(); document.querySelectorAll('.pillar').forEach(p => { const isActive = p.dataset.pillar === name; p.classList.toggle('active', isActive); p.setAttribute('aria-pressed', String(isActive)); }); if (name === 'objectives') viewObjectives(); else if (name === 'deliverables') viewDeliverables(); else if (name === 'budget') viewBudget(); else if (name === 'timeframe') viewTimeframe(); }
+  document.addEventListener('blur', event => { const el = event.target.closest('.editable-text'); if (!el) return; const value = getTextValue(el); if (el.dataset.bindType) updateBoundValue(el, value); else if (el.dataset.editKey) textOverrides[el.dataset.editKey] = value; saveState(); pulseSaved(el); }, true);
+  document.addEventListener('keydown', event => { const el = event.target.closest('.editable-text'); if (!el) return; if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); el.blur(); } if (event.key === 'Escape') { event.preventDefault(); el.blur(); setPillar(activePillar); initStaticEditables(); } });
+  document.addEventListener('paste', event => { const el = event.target.closest('.editable-text'); if (!el) return; event.preventDefault(); const text = (event.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); });
+  document.querySelectorAll('.pillar').forEach(p => { p.addEventListener('click', event => { if (event.target.closest('.editable-text')) return; setPillar(p.dataset.pillar); }); p.addEventListener('keydown', event => { if (event.target.closest('.editable-text')) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPillar(p.dataset.pillar); } }); });
+  document.getElementById('resetEdits').addEventListener('click', resetDashboardEverywhere);
+  document.getElementById('exportState').addEventListener('click', () => { const payload = JSON.stringify({ workstreams, budgetLines, textOverrides }, null, 2); const blob = new Blob([payload], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'phase-1-dashboard-edits.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+  renderMetrics(); renderPhaseStrip(); initStaticEditables(); setPillar(activePillar); initRemoteSync();
+
+</script>
+</body>
+</html>
