@@ -266,6 +266,140 @@
   .sync-status.synced { color: #1d9e75; background: rgba(29,158,117,0.10); }
   @media (max-width: 700px) { .top-nav { align-items:flex-start; flex-direction:column; } .top-nav .links { justify-content:flex-start; } .sync-status { display:flex; width: fit-content; margin: 8px 0 0; } }
 
+
+
+  /* Edit history panel */
+  .history-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: stretch;
+    justify-content: flex-end;
+    background: rgba(15, 23, 42, 0.34);
+    backdrop-filter: blur(6px);
+  }
+  .history-overlay.open { display: flex; }
+  .history-panel {
+    width: min(460px, 100%);
+    height: 100%;
+    background: #ffffff;
+    border-left: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: -26px 0 80px rgba(15, 23, 42, 0.22);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .history-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .history-kicker {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 10px;
+    font-weight: 900;
+  }
+  .history-title {
+    margin-top: 4px;
+    color: var(--navy);
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+  .history-close {
+    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--navy);
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .history-editor {
+    padding: 12px;
+    border: 1px solid rgba(54, 88, 136, 0.16);
+    border-radius: 14px;
+    background: var(--navy-soft, #eef3f8);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .history-editor strong { color: var(--navy); }
+  .history-controls { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .history-list {
+    overflow: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .history-empty {
+    color: var(--muted);
+    background: var(--bg, #f8fafc);
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .history-item {
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 13px 14px;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(31,42,55,0.04);
+  }
+  .history-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .history-action {
+    margin-top: 7px;
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 900;
+  }
+  .history-target {
+    margin-top: 4px;
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+  .history-diff {
+    margin-top: 8px;
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  .history-diff div {
+    background: var(--bg, #f8fafc);
+    border-radius: 10px;
+    padding: 8px 9px;
+    word-break: break-word;
+  }
+  .history-diff b { color: var(--ink); }
+  @media (max-width: 600px) {
+    .history-panel { width: 100%; padding: 18px; }
+  }
+
 </style>
 </head>
 <body>
@@ -308,10 +442,37 @@
   <section class="edit-toolbar" aria-label="Editing tools">
     <span><strong>Edit mode:</strong> click any text to edit it, then click away to save. Open a workstream and drag KPI rows to rearrange them. <span class="sync-status" id="syncStatus">Local draft</span></span>
     <div class="toolbar-actions">
+      <button class="toolbar-btn" id="openHistory" type="button">History</button>
       <button class="toolbar-btn" id="exportState" type="button">Export JSON</button>
       <button class="toolbar-btn" id="resetEdits" type="button">Reset edits</button>
     </div>
   </section>
+
+
+
+  <section class="history-overlay" id="historyOverlay" aria-hidden="true">
+    <aside class="history-panel" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+      <div class="history-head">
+        <div>
+          <div class="history-kicker">Shared dashboard</div>
+          <div class="history-title" id="historyTitle">Edit history</div>
+        </div>
+        <button class="history-close" id="closeHistory" type="button" aria-label="Close history">×</button>
+      </div>
+      <div class="history-editor">
+        Editing as: <strong id="currentEditorName">Anonymous</strong><br>
+        No login is used, so this name is for internal tracking only.
+        <div class="history-controls">
+          <button class="toolbar-btn" id="changeEditorName" type="button">Change name</button>
+          <button class="toolbar-btn" id="refreshHistory" type="button">Refresh history</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">Open history after the first edit to see changes here.</div>
+      </div>
+    </aside>
+  </section>
+
 
   <section class="metrics" id="metrics" aria-label="Phase summary metrics"></section>
 
@@ -491,6 +652,147 @@
   let suppressRemoteSave = false;
   let remoteSaveTimer = null;
 
+
+
+  const HISTORY_TABLE = 'dashboard_edit_history';
+  const EDITOR_NAME_KEY = 'digital-marketing-dashboard-editor-name';
+  const SESSION_ID_KEY = 'digital-marketing-dashboard-session-id';
+
+  function getSessionId() {
+    let sessionId = localStorage.getItem(SESSION_ID_KEY);
+    if (!sessionId) {
+      sessionId = 'Browser-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+      localStorage.setItem(SESSION_ID_KEY, sessionId);
+    }
+    return sessionId;
+  }
+  function getEditorName(promptIfMissing = false) {
+    let name = localStorage.getItem(EDITOR_NAME_KEY) || '';
+    if (!name && promptIfMissing) {
+      name = prompt('Enter your name for edit history. No password is required.', '') || '';
+      name = name.trim() || getSessionId();
+      localStorage.setItem(EDITOR_NAME_KEY, name);
+    }
+    return name || getSessionId();
+  }
+  function setEditorName() {
+    const current = localStorage.getItem(EDITOR_NAME_KEY) || '';
+    const name = prompt('Enter the name that should appear in edit history:', current) || current;
+    if (name && name.trim()) localStorage.setItem(EDITOR_NAME_KEY, name.trim());
+    renderEditorName();
+  }
+  function renderEditorName() {
+    const el = document.getElementById('currentEditorName');
+    if (el) el.textContent = getEditorName(false);
+  }
+  function friendlyAction(action) {
+    return String(action || '').replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+  function formatHistoryDate(value) {
+    try {
+      return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+    } catch (error) {
+      return value || '';
+    }
+  }
+  function shortValue(value, max = 260) {
+    const text = String(value ?? '').replace(/\s+/g, ' ').trim();
+    return text.length > max ? text.slice(0, max) + '…' : text;
+  }
+  function describeEditTarget(el) {
+    if (!el) return 'Dashboard text';
+    if (el.dataset.bindType === 'workstream') {
+      const ws = findWorkstream ? findWorkstream(el.dataset.wsId) : workstreams.find(w => w.id === el.dataset.wsId);
+      return `Workstream ${ws ? ws.num : ''}: ${ws ? ws.title : el.dataset.wsId} — ${el.dataset.field || 'text'}`;
+    }
+    if (el.dataset.bindType === 'item') {
+      const ws = findWorkstream ? findWorkstream(el.dataset.wsId) : workstreams.find(w => w.id === el.dataset.wsId);
+      const index = Number(el.dataset.itemIndex) + 1;
+      return `Workstream ${ws ? ws.num : ''}: ${ws ? ws.title : el.dataset.wsId} — KPI ${index}`;
+    }
+    if (el.dataset.bindType === 'budget') {
+      const index = Number(el.dataset.budgetIndex);
+      const item = budgetLines[index];
+      return `Budget: ${item ? item.cat : 'row ' + (index + 1)} — ${el.dataset.field || 'text'}`;
+    }
+    if (el.dataset.bindType === 'wave') {
+      const index = Number(el.dataset.waveIndex);
+      const item = typeof waves !== 'undefined' ? waves[index] : null;
+      return `Timeline: ${item ? item.name : 'wave ' + (index + 1)} — ${el.dataset.field || 'text'}`;
+    }
+    if (el.dataset.editKey) return el.dataset.editKey;
+    return 'Dashboard text';
+  }
+  async function logHistory({ actionType, targetLabel = '', oldValue = '', newValue = '' }) {
+    if (!supabaseClient) return;
+    if (String(oldValue ?? '') === String(newValue ?? '') && actionType === 'text_edit') return;
+    const payload = {
+      page_id: PAGE_ID,
+      action_type: actionType,
+      target_label: String(targetLabel || '').slice(0, 500),
+      old_value: String(oldValue ?? '').slice(0, 3000),
+      new_value: String(newValue ?? '').slice(0, 3000),
+      editor_name: getEditorName(true),
+      session_id: getSessionId()
+    };
+    const { error } = await supabaseClient.from(HISTORY_TABLE).insert(payload);
+    if (error) console.error('History log error:', error);
+  }
+  function renderHistoryRows(rows) {
+    const list = document.getElementById('historyList');
+    if (!list) return;
+    if (!rows || !rows.length) {
+      list.innerHTML = '<div class="history-empty">No edits recorded yet for this phase.</div>';
+      return;
+    }
+    list.innerHTML = rows.map(row => `
+      <article class="history-item">
+        <div class="history-meta"><span>${escapeHTML(row.editor_name || row.session_id || 'Unknown')}</span><span>${escapeHTML(formatHistoryDate(row.created_at))}</span></div>
+        <div class="history-action">${escapeHTML(friendlyAction(row.action_type))}</div>
+        <div class="history-target">${escapeHTML(row.target_label || PAGE_ID)}</div>
+        <div class="history-diff">
+          ${row.old_value ? `<div><b>Before:</b> ${escapeHTML(shortValue(row.old_value))}</div>` : ''}
+          ${row.new_value ? `<div><b>After:</b> ${escapeHTML(shortValue(row.new_value))}</div>` : ''}
+        </div>
+      </article>
+    `).join('');
+  }
+  async function loadHistory() {
+    renderEditorName();
+    const list = document.getElementById('historyList');
+    if (!list) return;
+    if (!supabaseClient) {
+      list.innerHTML = '<div class="history-empty">History needs Supabase config to be active.</div>';
+      return;
+    }
+    list.innerHTML = '<div class="history-empty">Loading history…</div>';
+    const { data, error } = await supabaseClient
+      .from(HISTORY_TABLE)
+      .select('*')
+      .eq('page_id', PAGE_ID)
+      .order('created_at', { ascending: false })
+      .limit(80);
+    if (error) {
+      console.error(error);
+      list.innerHTML = '<div class="history-empty">Could not load history. Check that the history SQL was run in Supabase.</div>';
+      return;
+    }
+    renderHistoryRows(data || []);
+  }
+  function openHistoryPanel() {
+    const overlay = document.getElementById('historyOverlay');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    loadHistory();
+  }
+  function closeHistoryPanel() {
+    const overlay = document.getElementById('historyOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
   function cloneForSync(value) { return JSON.parse(JSON.stringify(value)); }
   function getDashboardState() {
     const state = { workstreams, budgetLines, textOverrides, activePillar, savedAt: new Date().toISOString() };
@@ -572,6 +874,7 @@
     localStorage.removeItem(STORAGE_KEY);
     saveLocalState();
     if (supabaseClient && syncReady) await pushRemoteState();
+    await logHistory({ actionType: 'reset_dashboard', targetLabel: 'Full dashboard reset', oldValue: 'Custom text edits and KPI ordering', newValue: 'Dashboard restored to default state' });
     window.location.reload();
   }
 
@@ -693,7 +996,7 @@
   function enableKPIDragDrop(ws, listEl) {
     listEl.addEventListener('dragstart', event => { if (event.target.closest('.editable-text')) { event.preventDefault(); return; } const row = event.target.closest('.item-row'); if (!row) return; row.classList.add('dragging'); listEl.classList.add('drag-active'); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', row.dataset.index); });
     listEl.addEventListener('dragover', event => { event.preventDefault(); const dragging = listEl.querySelector('.dragging'); if (!dragging) return; const afterElement = getDragAfterElement(listEl, event.clientY); if (afterElement == null) listEl.appendChild(dragging); else listEl.insertBefore(dragging, afterElement); });
-    listEl.addEventListener('drop', event => { event.preventDefault(); const rows = Array.from(listEl.querySelectorAll('.item-row')); const reordered = rows.map(row => ws.items[Number(row.dataset.index)]).filter(Boolean); if (reordered.length === ws.items.length) { ws.items = reordered; saveState(); viewWorkstream(ws.id); } });
+    listEl.addEventListener('drop', event => { event.preventDefault(); const rows = Array.from(listEl.querySelectorAll('.item-row')); const reordered = rows.map(row => ws.items[Number(row.dataset.index)]).filter(Boolean); if (reordered.length === ws.items.length) { const oldOrder = ws.items.map(item => item.text || '').join(' | '); const newOrder = reordered.map(item => item.text || '').join(' | '); ws.items = reordered; saveState(); if (oldOrder !== newOrder) logHistory({ actionType: 'kpi_reorder', targetLabel: `Workstream ${ws.num}: ${ws.title}`, oldValue: oldOrder, newValue: newOrder }); viewWorkstream(ws.id); } });
     listEl.addEventListener('dragend', () => { listEl.classList.remove('drag-active'); listEl.querySelectorAll('.dragging').forEach(row => row.classList.remove('dragging')); });
   }
   function getDragAfterElement(container, y) {
@@ -735,11 +1038,20 @@
     if (name === 'objectives') viewObjectives(); else if (name === 'deliverables') viewDeliverables(); else if (name === 'budget') viewBudget(); else if (name === 'timeframe') viewTimeframe();
   }
 
+  document.addEventListener('focusin', event => {
+    const el = event.target.closest('.editable-text');
+    if (!el) return;
+    el.dataset.historyBefore = getTextValue(el);
+    el.dataset.historyTarget = describeEditTarget(el);
+  });
+
   document.addEventListener('blur', event => {
     const el = event.target.closest('.editable-text'); if (!el) return;
+    const oldValue = el.dataset.historyBefore || '';
+    const targetLabel = el.dataset.historyTarget || describeEditTarget(el);
     const value = getTextValue(el);
     if (el.dataset.bindType) updateBoundValue(el, value); else if (el.dataset.editKey) textOverrides[el.dataset.editKey] = value;
-    saveState(); pulseSaved(el);
+    saveState(); if (oldValue !== value) logHistory({ actionType: 'text_edit', targetLabel, oldValue, newValue: value }); pulseSaved(el);
   }, true);
   document.addEventListener('keydown', event => {
     const el = event.target.closest('.editable-text'); if (!el) return;
@@ -756,10 +1068,20 @@
   });
   document.getElementById('resetEdits').addEventListener('click', resetDashboardEverywhere);
   document.getElementById('exportState').addEventListener('click', () => {
+    logHistory({ actionType: 'export_json', targetLabel: 'Dashboard export', oldValue: '', newValue: 'Exported current dashboard state as JSON' });
     const payload = JSON.stringify({ workstreams, budgetLines, waves, textOverrides }, null, 2);
     const blob = new Blob([payload], { type: 'application/json' }); const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'phase-2-dashboard-edits.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   });
+
+
+  document.getElementById('openHistory').addEventListener('click', openHistoryPanel);
+  document.getElementById('closeHistory').addEventListener('click', closeHistoryPanel);
+  document.getElementById('refreshHistory').addEventListener('click', loadHistory);
+  document.getElementById('changeEditorName').addEventListener('click', setEditorName);
+  document.getElementById('historyOverlay').addEventListener('click', event => { if (event.target.id === 'historyOverlay') closeHistoryPanel(); });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeHistoryPanel(); });
+  renderEditorName();
 
   renderMetrics(); renderPhaseStrip(); initStaticEditables(); setPillar(activePillar); initRemoteSync();
 </script>
