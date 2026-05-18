@@ -637,6 +637,7 @@
   let waves = Array.isArray(savedState.waves) ? savedState.waves : deepClone(DEFAULT_WAVES);
   let textOverrides = savedState.textOverrides || {};
   let activePillar = savedState.activePillar || 'objectives';
+  let activeWorkstreamId = savedState.activeWorkstreamId || null;
 
   const body = document.getElementById('body');
   const phaseStrip = document.getElementById('phaseStrip');
@@ -794,9 +795,15 @@
   }
 
   function cloneForSync(value) { return JSON.parse(JSON.stringify(value)); }
-  function getDashboardState() {
-    const state = { workstreams, budgetLines, textOverrides, activePillar, savedAt: new Date().toISOString() };
+  function getSharedDashboardState() {
+    const state = { workstreams, budgetLines, textOverrides, savedAt: new Date().toISOString() };
     if (typeof waves !== 'undefined') state.waves = waves;
+    return state;
+  }
+  function getLocalDashboardState() {
+    const state = getSharedDashboardState();
+    state.activePillar = activePillar;
+    state.activeWorkstreamId = activeWorkstreamId;
     return state;
   }
   function setSyncStatus(message, mode = '') {
@@ -805,7 +812,7 @@
     el.textContent = message;
     el.className = 'sync-status' + (mode ? ' ' + mode : '');
   }
-  function saveLocalState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getDashboardState())); }
+  function saveLocalState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getLocalDashboardState())); }
   function saveState() {
     saveLocalState();
     if (!suppressRemoteSave) scheduleRemoteSave();
@@ -819,10 +826,21 @@
   }
   async function pushRemoteState() {
     if (!supabaseClient) return;
-    const payload = { id: PAGE_ID, content: getDashboardState(), updated_at: new Date().toISOString() };
+    const payload = { id: PAGE_ID, content: getSharedDashboardState(), updated_at: new Date().toISOString() };
     const { error } = await supabaseClient.from(SUPABASE_TABLE).upsert(payload, { onConflict: 'id' });
     if (error) { console.error(error); setSyncStatus('Sync error', 'error'); return; }
     setSyncStatus('Synced', 'synced');
+  }
+  function renderActiveViewAfterSync() {
+    const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest('.editable-text');
+    if (editing) {
+      setSyncStatus('Synced live', 'synced');
+      return;
+    }
+    renderMetrics();
+    renderPhaseStrip();
+    initStaticEditables(false);
+    renderCurrentView();
   }
   function applyDashboardState(state) {
     if (!state || typeof state !== 'object') return;
@@ -830,12 +848,9 @@
     if (Array.isArray(state.budgetLines)) budgetLines = cloneForSync(state.budgetLines);
     if (typeof DEFAULT_WAVES !== 'undefined' && typeof waves !== 'undefined' && Array.isArray(state.waves)) waves = cloneForSync(state.waves);
     textOverrides = state.textOverrides && typeof state.textOverrides === 'object' ? cloneForSync(state.textOverrides) : {};
-    activePillar = state.activePillar || activePillar || 'objectives';
+    // Important: navigation state is intentionally local. Remote saves should not force everyone into the same pillar/workstream.
     saveLocalState();
-    renderMetrics();
-    renderPhaseStrip();
-    setPillar(activePillar);
-    initStaticEditables();
+    renderActiveViewAfterSync();
     setSyncStatus('Synced live', 'synced');
   }
   async function initRemoteSync() {
@@ -894,7 +909,7 @@
     el.classList.add('editable-text'); el.setAttribute('contenteditable', 'plaintext-only'); el.setAttribute('spellcheck', 'false'); el.dataset.editKey = key;
     if (Object.prototype.hasOwnProperty.call(textOverrides, key)) el.textContent = textOverrides[key]; else textOverrides[key] = el.textContent.trim();
   }
-  function initStaticEditables() {
+  function initStaticEditables(shouldSave = false) {
     applyStaticEditable('.eyebrow', 'hero.eyebrow');
     applyStaticEditable('#pageTitle', 'hero.title');
     applyStaticEditable('.hero-copy', 'hero.copy');
@@ -913,7 +928,7 @@
       applyStaticEditable(`.pillar:nth-child(${index + 1}) .pillar-desc`, `pillar.${index}.desc`);
     });
     applyStaticEditable('.foot-note', 'footer.note');
-    saveState();
+    if (shouldSave) saveState();
   }
 
   function updateBoundValue(el, value) {
@@ -979,8 +994,12 @@
     animateBody();
   }
 
-  function viewWorkstream(id) {
+  function viewWorkstream(id, options = {}) {
     const ws = workstreams.find(w => w.id === id); if (!ws) return;
+    activePillar = 'deliverables';
+    activeWorkstreamId = id;
+    updatePillarButtons();
+    if (!options.preserveState) saveLocalState();
     body.innerHTML = `<div class="view-head"><div>${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'view-title' })}<div class="view-sub">${editableStatic('workstream.detail.prefix.' + ws.id, `Workstream ${ws.num} of 6 ·`, 'span')} ${editableBound({ value: ws.desc, bindType: 'workstream', wsId: ws.id, field: 'desc' })}</div></div>${editableBound({ value: ws.tag, bindType: 'workstream', wsId: ws.id, field: 'tag', tag: 'div', className: 'view-tag' })}</div><div class="workstream-brief"><div class="brief-card primary">${editableStatic('workstream.detail.focusLabel.' + ws.id, 'Testing focus', 'div', 'brief-label')}${editableBound({ value: ws.sub, bindType: 'workstream', wsId: ws.id, field: 'sub', tag: 'div', className: 'brief-value' })}</div><div class="brief-card">${editableStatic('workstream.detail.itemsLabel.' + ws.id, 'KPI items', 'div', 'brief-label')}${editableStatic('workstream.detail.itemsValue.' + ws.id, ws.items.length, 'div', 'brief-value')}</div><div class="brief-card">${editableStatic('workstream.detail.phaseLabel.' + ws.id, 'Phase role', 'div', 'brief-label')}${editableBound({ value: ws.tag, bindType: 'workstream', wsId: ws.id, field: 'tag', tag: 'div', className: 'brief-value' })}</div></div><div class="items-head"><span class="ih-label">KPIs and validation steps</span><span class="drag-note">Drag rows to rearrange</span></div><div class="item-list" id="wsItems"></div><div class="outcome-box"><div class="outcome-label">What it produces</div>${editableBound({ value: ws.outcome, bindType: 'workstream', wsId: ws.id, field: 'outcome', tag: 'div', className: 'outcome-text' })}</div><button class="back-btn" id="wsBack" type="button">← Back to workstreams</button>`;
     const itemsEl = document.getElementById('wsItems');
     ws.items.forEach((it, index) => {
@@ -989,7 +1008,7 @@
       itemsEl.appendChild(row);
     });
     enableKPIDragDrop(ws, itemsEl);
-    document.getElementById('wsBack').addEventListener('click', viewDeliverables);
+    document.getElementById('wsBack').addEventListener('click', () => setPillar('deliverables'));
     animateBody();
   }
 
@@ -1032,10 +1051,26 @@
     animateBody();
   }
 
+  function updatePillarButtons() {
+    document.querySelectorAll('.pillar').forEach(p => {
+      const isActive = p.dataset.pillar === activePillar;
+      p.classList.toggle('active', isActive);
+      p.setAttribute('aria-pressed', String(isActive));
+    });
+  }
+  function renderCurrentView() {
+    updatePillarButtons();
+    if (activePillar === 'objectives') viewObjectives();
+    else if (activePillar === 'deliverables' && activeWorkstreamId && workstreams.some(w => w.id === activeWorkstreamId)) viewWorkstream(activeWorkstreamId, { preserveState: true });
+    else if (activePillar === 'deliverables') viewDeliverables();
+    else if (activePillar === 'budget') viewBudget();
+    else if (activePillar === 'timeframe') viewTimeframe();
+  }
   function setPillar(name) {
-    activePillar = name; saveState();
-    document.querySelectorAll('.pillar').forEach(p => { const isActive = p.dataset.pillar === name; p.classList.toggle('active', isActive); p.setAttribute('aria-pressed', String(isActive)); });
-    if (name === 'objectives') viewObjectives(); else if (name === 'deliverables') viewDeliverables(); else if (name === 'budget') viewBudget(); else if (name === 'timeframe') viewTimeframe();
+    activePillar = name;
+    activeWorkstreamId = null;
+    saveLocalState();
+    renderCurrentView();
   }
 
   document.addEventListener('focusin', event => {
@@ -1056,7 +1091,7 @@
   document.addEventListener('keydown', event => {
     const el = event.target.closest('.editable-text'); if (!el) return;
     if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); el.blur(); }
-    if (event.key === 'Escape') { event.preventDefault(); el.blur(); setPillar(activePillar); initStaticEditables(); }
+    if (event.key === 'Escape') { event.preventDefault(); el.blur(); renderCurrentView(); initStaticEditables(false); }
   });
   document.addEventListener('paste', event => {
     const el = event.target.closest('.editable-text'); if (!el) return;
@@ -1083,7 +1118,7 @@
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeHistoryPanel(); });
   renderEditorName();
 
-  renderMetrics(); renderPhaseStrip(); initStaticEditables(); setPillar(activePillar); initRemoteSync();
+  renderMetrics(); renderPhaseStrip(); initStaticEditables(false); renderCurrentView(); initRemoteSync();
 </script>
 </body>
 </html>

@@ -1652,6 +1652,7 @@
   let budgetLines = Array.isArray(savedState.budgetLines) ? savedState.budgetLines : clone(DEFAULT_BUDGET_LINES);
   let textOverrides = savedState.textOverrides || {};
   let activePillar = savedState.activePillar || 'objectives';
+  let activeWorkstreamId = savedState.activeWorkstreamId || null;
 
   const body = document.getElementById('body');
   const phaseStrip = document.getElementById('phaseStrip');
@@ -1809,9 +1810,15 @@
   }
 
   function cloneForSync(value) { return JSON.parse(JSON.stringify(value)); }
-  function getDashboardState() {
-    const state = { workstreams, budgetLines, textOverrides, activePillar, savedAt: new Date().toISOString() };
+  function getSharedDashboardState() {
+    const state = { workstreams, budgetLines, textOverrides, savedAt: new Date().toISOString() };
     if (typeof waves !== 'undefined') state.waves = waves;
+    return state;
+  }
+  function getLocalDashboardState() {
+    const state = getSharedDashboardState();
+    state.activePillar = activePillar;
+    state.activeWorkstreamId = activeWorkstreamId;
     return state;
   }
   function setSyncStatus(message, mode = '') {
@@ -1820,7 +1827,7 @@
     el.textContent = message;
     el.className = 'sync-status' + (mode ? ' ' + mode : '');
   }
-  function saveLocalState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getDashboardState())); }
+  function saveLocalState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getLocalDashboardState())); }
   function saveState() {
     saveLocalState();
     if (!suppressRemoteSave) scheduleRemoteSave();
@@ -1834,10 +1841,21 @@
   }
   async function pushRemoteState() {
     if (!supabaseClient) return;
-    const payload = { id: PAGE_ID, content: getDashboardState(), updated_at: new Date().toISOString() };
+    const payload = { id: PAGE_ID, content: getSharedDashboardState(), updated_at: new Date().toISOString() };
     const { error } = await supabaseClient.from(SUPABASE_TABLE).upsert(payload, { onConflict: 'id' });
     if (error) { console.error(error); setSyncStatus('Sync error', 'error'); return; }
     setSyncStatus('Synced', 'synced');
+  }
+  function renderActiveViewAfterSync() {
+    const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest('.editable-text');
+    if (editing) {
+      setSyncStatus('Synced live', 'synced');
+      return;
+    }
+    renderMetrics();
+    renderPhaseStrip();
+    initStaticEditables(false);
+    renderCurrentView();
   }
   function applyDashboardState(state) {
     if (!state || typeof state !== 'object') return;
@@ -1845,12 +1863,9 @@
     if (Array.isArray(state.budgetLines)) budgetLines = cloneForSync(state.budgetLines);
     if (typeof DEFAULT_WAVES !== 'undefined' && typeof waves !== 'undefined' && Array.isArray(state.waves)) waves = cloneForSync(state.waves);
     textOverrides = state.textOverrides && typeof state.textOverrides === 'object' ? cloneForSync(state.textOverrides) : {};
-    activePillar = state.activePillar || activePillar || 'objectives';
+    // Important: navigation state is intentionally local. Remote saves should not force everyone into the same pillar/workstream.
     saveLocalState();
-    renderMetrics();
-    renderPhaseStrip();
-    setPillar(activePillar);
-    initStaticEditables();
+    renderActiveViewAfterSync();
     setSyncStatus('Synced live', 'synced');
   }
   async function initRemoteSync() {
@@ -1904,7 +1919,7 @@
   function pulseSaved(el) { el.classList.remove('save-pulse'); void el.offsetWidth; el.classList.add('save-pulse'); }
   function updateBoundValue(el, value) { const type = el.dataset.bindType; const field = el.dataset.field; if (type === 'workstream') { const ws = findWorkstream(el.dataset.wsId); if (ws && field in ws) ws[field] = value; } if (type === 'item') { const ws = findWorkstream(el.dataset.wsId); const idx = Number(el.dataset.itemIndex); if (ws && ws.items[idx] && field in ws.items[idx]) ws.items[idx][field] = value; } if (type === 'budget') { const idx = Number(el.dataset.budgetIndex); if (budgetLines[idx] && field in budgetLines[idx]) budgetLines[idx][field] = value; } }
   function applyStaticEditable(selector, key) { const el = document.querySelector(selector); if (!el) return; el.classList.add('editable-text'); el.setAttribute('contenteditable', 'plaintext-only'); el.setAttribute('spellcheck', 'false'); el.dataset.editKey = key; if (Object.prototype.hasOwnProperty.call(textOverrides, key)) { el.textContent = textOverrides[key]; } else { textOverrides[key] = el.textContent.trim(); } }
-  function initStaticEditables() {
+  function initStaticEditables(shouldSave = false) {
     const staticItems = [
       ['.hero .eyebrow', 'hero.eyebrow'], ['#pageTitle', 'hero.title'], ['.hero-copy', 'hero.copy'],
       ['.hero-meta .meta-chip:nth-child(1)', 'hero.meta.1'], ['.hero-meta .meta-chip:nth-child(2)', 'hero.meta.2'], ['.hero-meta .meta-chip:nth-child(3)', 'hero.meta.3'],
@@ -1916,7 +1931,7 @@
       ['[data-pillar="budget"] .pillar-letter', 'pillar.budget.letter'], ['[data-pillar="budget"] .pillar-name', 'pillar.budget.name'], ['[data-pillar="budget"] .pillar-desc', 'pillar.budget.desc'],
       ['[data-pillar="timeframe"] .pillar-letter', 'pillar.timeframe.letter'], ['[data-pillar="timeframe"] .pillar-name', 'pillar.timeframe.name'], ['[data-pillar="timeframe"] .pillar-desc', 'pillar.timeframe.desc']
     ];
-    staticItems.forEach(([selector, key]) => applyStaticEditable(selector, key)); saveState();
+    staticItems.forEach(([selector, key]) => applyStaticEditable(selector, key)); if (shouldSave) saveState();
   }
 
   function renderMetrics() {
@@ -1943,12 +1958,12 @@
     workstreams.forEach(ws => { const doneCount = ws.items.filter(it => it.status === 'done').length; const progressPercent = Math.round((doneCount / ws.items.length) * 100); const nextIndex = getNextMilestoneIndex(ws); const next = ws.items[nextIndex]; const card = document.createElement('div'); card.className = 'ws-card'; card.setAttribute('role', 'button'); card.setAttribute('tabindex', '0'); card.innerHTML = `<div class="ws-num">${String(ws.num).padStart(2, '0')}</div><div><div class="ws-title-row">${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'ws-title' })}${editableStatic('workstream.' + ws.id + '.progressLabel', `${doneCount}/${ws.items.length}`, 'div', 'ws-prog')}</div>${editableBound({ value: ws.sub, bindType: 'workstream', wsId: ws.id, field: 'sub', tag: 'div', className: 'ws-sub' })}<div class="ws-progress-bar" aria-hidden="true"><span style="width:${progressPercent}%"></span></div><div class="next-milestone"><strong>Next:</strong> ${editableBound({ value: next.text, bindType: 'item', wsId: ws.id, itemIndex: nextIndex, field: 'text' })}</div></div>`; card.addEventListener('click', event => { if (event.target.closest('.editable-text')) return; viewWorkstream(ws.id); }); card.addEventListener('keydown', event => { if (event.target.closest('.editable-text')) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); viewWorkstream(ws.id); } }); grid.appendChild(card); }); animateBody();
   }
 
-  function viewWorkstream(id) {
-    const ws = findWorkstream(id); if (!ws) return; const doneCount = ws.items.filter(it => it.status === 'done').length; const progressCount = ws.items.filter(it => it.status === 'progress').length; const scheduledCount = ws.items.filter(it => it.status === 'scheduled').length; const nextIndex = getNextMilestoneIndex(ws); const next = ws.items[nextIndex];
+  function viewWorkstream(id, options = {}) {
+    const ws = findWorkstream(id); if (!ws) return; activePillar = 'deliverables'; activeWorkstreamId = id; updatePillarButtons(); if (!options.preserveState) saveLocalState(); const doneCount = ws.items.filter(it => it.status === 'done').length; const progressCount = ws.items.filter(it => it.status === 'progress').length; const scheduledCount = ws.items.filter(it => it.status === 'scheduled').length; const nextIndex = getNextMilestoneIndex(ws); const next = ws.items[nextIndex];
     body.innerHTML = `<div class="view-head"><div>${editableBound({ value: ws.title, bindType: 'workstream', wsId: ws.id, field: 'title', tag: 'div', className: 'view-title' })}<div class="view-sub">${editableStatic('workstream.detail.prefix.' + ws.id, `Workstream ${ws.num} of 8 ·`, 'span')} ${editableBound({ value: ws.desc, bindType: 'workstream', wsId: ws.id, field: 'desc' })}</div></div>${editableStatic('workstream.detail.tag.' + ws.id, `${doneCount}/${ws.items.length} complete`, 'div', 'view-tag')}</div><div class="workstream-brief"><div class="brief-card primary">${editableStatic('workstream.detail.nextLabel.' + ws.id, 'Next milestone', 'div', 'brief-label')}${editableBound({ value: next.text, bindType: 'item', wsId: ws.id, itemIndex: nextIndex, field: 'text', tag: 'div', className: 'brief-value' })}</div><div class="brief-card">${editableStatic('workstream.detail.doneLabel.' + ws.id, 'Done', 'div', 'brief-label')}${editableStatic('workstream.detail.doneValue.' + ws.id, doneCount, 'div', 'brief-value')}</div><div class="brief-card">${editableStatic('workstream.detail.progressLabel.' + ws.id, 'In progress', 'div', 'brief-label')}${editableStatic('workstream.detail.progressValue.' + ws.id, progressCount, 'div', 'brief-value')}</div><div class="brief-card">${editableStatic('workstream.detail.scheduledLabel.' + ws.id, 'Scheduled', 'div', 'brief-label')}${editableStatic('workstream.detail.scheduledValue.' + ws.id, scheduledCount, 'div', 'brief-value')}</div></div><div class="items-head">${editableStatic('workstream.detail.kpiLabel.' + ws.id, 'KPIs and status', 'span', 'ih-label')}${editableStatic('workstream.detail.sortHint.' + ws.id, 'Drag rows to rearrange. Click text to edit.', 'span', 'sortable-hint')}</div><div class="item-list" id="wsItems"></div><button class="back-btn" id="wsBack" type="button">← ${editableStatic('workstream.detail.backLabel.' + ws.id, 'Back to workstreams')}</button>`;
     const itemsEl = document.getElementById('wsItems');
     ws.items.forEach((it, index) => { const row = document.createElement('div'); row.className = `item-row is-${it.status}`; row.setAttribute('draggable', 'true'); row.dataset.index = String(index); row.innerHTML = `<span class="drag-handle" aria-hidden="true">⋮⋮</span>${editableBound({ value: it.pill, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'pill', tag: 'span', className: `status-pill sp-${it.status}` })}${editableBound({ value: it.text, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'text', tag: 'span', className: 'item-text' })}${editableBound({ value: it.when, bindType: 'item', wsId: ws.id, itemIndex: index, field: 'when', tag: 'span', className: 'item-when' })}`; itemsEl.appendChild(row); });
-    enableKPIDragDrop(ws, itemsEl); document.getElementById('wsBack').addEventListener('click', viewDeliverables); animateBody();
+    enableKPIDragDrop(ws, itemsEl); document.getElementById('wsBack').addEventListener('click', () => setPillar('deliverables')); animateBody();
   }
   function enableKPIDragDrop(ws, listEl) { listEl.addEventListener('dragstart', event => { if (event.target.closest('.editable-text')) { event.preventDefault(); return; } const row = event.target.closest('.item-row'); if (!row) return; row.classList.add('dragging'); listEl.classList.add('drag-active'); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', row.dataset.index); }); listEl.addEventListener('dragover', event => { event.preventDefault(); const dragging = listEl.querySelector('.dragging'); if (!dragging) return; const afterElement = getDragAfterElement(listEl, event.clientY); if (afterElement == null) listEl.appendChild(dragging); else listEl.insertBefore(dragging, afterElement); }); listEl.addEventListener('drop', event => { event.preventDefault(); const rows = Array.from(listEl.querySelectorAll('.item-row')); const reordered = rows.map(row => ws.items[Number(row.dataset.index)]).filter(Boolean); if (reordered.length === ws.items.length) { const oldOrder = ws.items.map(item => item.text || '').join(' | '); const newOrder = reordered.map(item => item.text || '').join(' | '); ws.items = reordered; saveState(); if (oldOrder !== newOrder) logHistory({ actionType: 'kpi_reorder', targetLabel: `Workstream ${ws.num}: ${ws.title}`, oldValue: oldOrder, newValue: newOrder }); viewWorkstream(ws.id); } }); listEl.addEventListener('dragend', () => { listEl.classList.remove('drag-active'); listEl.querySelectorAll('.dragging').forEach(row => row.classList.remove('dragging')); }); }
   function getDragAfterElement(container, y) { const draggableElements = [...container.querySelectorAll('.item-row:not(.dragging)')]; return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2; if (offset < 0 && offset > closest.offset) return { offset, element: child }; return closest; }, { offset: Number.NEGATIVE_INFINITY }).element; }
@@ -1967,7 +1982,27 @@
     body.innerHTML = html; animateBody();
   }
 
-  function setPillar(name) { activePillar = name; saveState(); document.querySelectorAll('.pillar').forEach(p => { const isActive = p.dataset.pillar === name; p.classList.toggle('active', isActive); p.setAttribute('aria-pressed', String(isActive)); }); if (name === 'objectives') viewObjectives(); else if (name === 'deliverables') viewDeliverables(); else if (name === 'budget') viewBudget(); else if (name === 'timeframe') viewTimeframe(); }
+  function updatePillarButtons() {
+    document.querySelectorAll('.pillar').forEach(p => {
+      const isActive = p.dataset.pillar === activePillar;
+      p.classList.toggle('active', isActive);
+      p.setAttribute('aria-pressed', String(isActive));
+    });
+  }
+  function renderCurrentView() {
+    updatePillarButtons();
+    if (activePillar === 'objectives') viewObjectives();
+    else if (activePillar === 'deliverables' && activeWorkstreamId && workstreams.some(w => w.id === activeWorkstreamId)) viewWorkstream(activeWorkstreamId, { preserveState: true });
+    else if (activePillar === 'deliverables') viewDeliverables();
+    else if (activePillar === 'budget') viewBudget();
+    else if (activePillar === 'timeframe') viewTimeframe();
+  }
+  function setPillar(name) {
+    activePillar = name;
+    activeWorkstreamId = null;
+    saveLocalState();
+    renderCurrentView();
+  }
   document.addEventListener('focusin', event => {
     const el = event.target.closest('.editable-text');
     if (!el) return;
@@ -1976,7 +2011,7 @@
   });
 
   document.addEventListener('blur', event => { const el = event.target.closest('.editable-text'); if (!el) return; const oldValue = el.dataset.historyBefore || ''; const targetLabel = el.dataset.historyTarget || describeEditTarget(el); const value = getTextValue(el); if (el.dataset.bindType) updateBoundValue(el, value); else if (el.dataset.editKey) textOverrides[el.dataset.editKey] = value; saveState(); if (oldValue !== value) logHistory({ actionType: 'text_edit', targetLabel, oldValue, newValue: value }); pulseSaved(el); }, true);
-  document.addEventListener('keydown', event => { const el = event.target.closest('.editable-text'); if (!el) return; if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); el.blur(); } if (event.key === 'Escape') { event.preventDefault(); el.blur(); setPillar(activePillar); initStaticEditables(); } });
+  document.addEventListener('keydown', event => { const el = event.target.closest('.editable-text'); if (!el) return; if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); el.blur(); } if (event.key === 'Escape') { event.preventDefault(); el.blur(); renderCurrentView(); initStaticEditables(false); } });
   document.addEventListener('paste', event => { const el = event.target.closest('.editable-text'); if (!el) return; event.preventDefault(); const text = (event.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); });
   document.querySelectorAll('.pillar').forEach(p => { p.addEventListener('click', event => { if (event.target.closest('.editable-text')) return; setPillar(p.dataset.pillar); }); p.addEventListener('keydown', event => { if (event.target.closest('.editable-text')) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPillar(p.dataset.pillar); } }); });
   document.getElementById('resetEdits').addEventListener('click', resetDashboardEverywhere);
@@ -1989,7 +2024,7 @@
   document.getElementById('historyOverlay').addEventListener('click', event => { if (event.target.id === 'historyOverlay') closeHistoryPanel(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeHistoryPanel(); });
   renderEditorName();
-  renderMetrics(); renderPhaseStrip(); initStaticEditables(); setPillar(activePillar); initRemoteSync();
+  renderMetrics(); renderPhaseStrip(); initStaticEditables(false); renderCurrentView(); initRemoteSync();
 
 </script>
 </body>
